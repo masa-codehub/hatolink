@@ -1,0 +1,207 @@
+# -------------------------------------------------------------------
+# 要件定義書：補助金・助成金情報 Twitter自動投稿システム
+# バージョン: 1.0 (最終版)
+# 作成日: 2025-07-05
+# -------------------------------------------------------------------
+apiVersion: v1.0
+kind: RequirementsDefinition
+metadata:
+  name: "Subsidy-Info-Twitter-Auto-Poster"
+  description: "補助金・助成金情報をTwitterへ自動投稿するシステムの要件定義書"
+
+spec:
+  summaryAndBackground:
+    background: "現在、スクレイピングにより収集した補助金・助成金情報を週次で集計し、Excelで管理、メルマガで配信する業務フローが存在する。"
+    problemToSolve: "週に数千件発生する大量の情報を、手動でタイムリーに発信することは非現実的であり、情報の即時性の欠如とリーチの限界という課題を抱えている。"
+    purpose: "情報発信プロセスを自動化し、効率性、即時性を向上させ、サービスのリーチを最大化し、情報プラットフォームとしての価値を高める。"
+
+  objectivesAndGoals:
+    businessObjectives:
+      - "情報発信チャネルを拡大し、Twitter経由での新規フォロワーおよび潜在顧客を獲得する。"
+      - "情報発信のリードタイムを短縮し、「速報性」をサービスのコアバリューとする。"
+      - "手動投稿にかかる運用コストをゼロに近づけ、より価値の高い業務へリソースを再配分する。"
+    successCriteria:
+      - "コンテンツ管理者が定義した投稿キューに基づき、99.9%以上のツイートが自動で正常に投稿される。"
+      - "週あたり最大5,000件のツイート投稿を、Twitter APIのレートリミットを遵守しながら安定して処理できる。"
+      - "将来的な仕様変更（例：投稿先のSNS媒体の追加）に対して、コアとなるビジネスロジックに影響を与えずに対応可能なアーキテクチャであること。"
+
+  scope:
+    inScope:
+      - "ツイートコンテンツ（テキスト、投稿予約日時、画像リンク）のデータ管理機能"
+      - "Googleスプレッドシートからのデータ一括登録機能"
+      - "管理画面からのデータ個別登録・編集・削除機能"
+      - "予約日時に基づくTwitterへの自動投稿機能"
+      - "投稿結果（成功・失敗・恒久エラー）のステータス管理機能"
+      - "無限リトライを防止するためのリトライ回数管理機能"
+      - "投稿失敗時のエラーログ記録機能"
+    outOfScope:
+      - "補助金・助成金情報の収集（スクレイピング等）"
+      - "AIなどを用いたツイート本文の自動生成"
+      - "投稿後のエンゲージメント（いいね、リプライ等）の監視・分析・対応"
+      - "Twitterアカウント自体の管理・運用"
+
+  stakeholders:
+    - role: "コンテンツ管理者"
+      responsibilities: "本システムの主たる運用者。投稿コンテンツの品質とスケジュールに責任を持つ。"
+      expectations: "直感的で間違いなく操作できるUI。大量のデータを効率的に管理できる機能。エラー発生時の明確な状況把握。"
+      dddPerspective: "最も重要なドメインエキスパート。彼/彼女らが日常的に使用する言葉（例：「予約」「キューに入れる」「投稿済み」など）をユビキタス言語として抽出し、モデルに反映させる。"
+    - role: "事業責任者"
+      responsibilities: "プロジェクトのオーナー。投資対効果（ROI）に責任を持つ。"
+      expectations: "システム導入によるリーチ拡大や工数削減といったビジネス価値の実現。"
+
+  useCases:
+    - name: "自動投稿エンジンが予約ツイートを投稿する"
+      actor: "自動投稿エンジン（システム）"
+      preconditions:
+        - "投稿キューに「未投稿」ステータスのツイートが存在する。"
+      postconditions:
+        - "（成功時）投稿されたツイートのステータスが「投稿済」に更新され、投稿完了日時が記録される。"
+        - "（失敗時）ツイートのリトライ回数がインクリメントされ、エラーログシートに失敗情報が記録される。"
+        - "（リトライ上限到達時）ツイートのステータスが「恒久エラー」に更新され、以降の処理対象から除外される。"
+      basicFlow:
+        - "システムは定刻に起動する。"
+        - "システムは投稿キューから、現在時刻が投稿予約日時を過ぎている「未投稿」ステータス、かつリトライ回数が上限未満のツイートを取得する。"
+        - "（画像がある場合）システムはGoogleドライブのURLから画像データを取得する。"
+        - "システムは取得したツイート内容（と画像）をTwitter APIへ送信する。"
+        - "システムはAPIからの成功応答を受け、対象ツイートのステータスを「投稿済」に更新し、投稿完了日時を記録する。"
+      alternativeFlow:
+        name: "リトライ戦略"
+        steps:
+          - "Twitter APIからエラーが返却された場合、対象ツイートのリトライ回数を+1する。"
+          - "エラー情報を別のエラーログシートに記録する。"
+          - "リトライ回数が設定された上限値に達した場合、ステータスを「恒久エラー」に変更する。上限に達していない場合は、ステータスは「未投稿」のまま変更しない。"
+
+  domainModel:
+    aggregates:
+      - name: "ツイート (Tweet) 集約"
+        rootEntity:
+          name: "Tweet"
+          attributes:
+            - name: "tweetId"
+              type: "一意な識別子"
+            - name: "body"
+              type: "TweetBody (値オブジェクト)"
+            - name: "status"
+              type: "PostStatus (値オブジェクト)"
+            - name: "retryCount"
+              type: "Integer"
+              description: "リトライ回数"
+            - name: "scheduledAt"
+              type: "DateTime"
+              description: "投稿予約日時"
+            - name: "postedAt"
+              type: "DateTime"
+              description: "投稿完了日時（投稿後に設定）"
+            - name: "imageLinks"
+              type: "List<GoogleDriveLink>"
+              description: "Googleドライブの画像リンク（0〜4件）"
+    valueObjects:
+      - name: "TweetBody"
+        description: "ツイート本文。文字数制限（URLは23文字として計算）などの不変条件を持つ。"
+      - name: "PostStatus"
+        description: "投稿ステータス。Enum型 (SCHEDULED, POSTED, PERMANENT_ERROR)"
+      - name: "GoogleDriveLink"
+        description: "GoogleドライブのURL形式であるという不変条件を持つ。"
+    domainEvents:
+      - "TweetScheduled"
+      - "TweetPosted"
+      - "TweetPostingFailed"
+      - "TweetRetryLimitExceeded"
+    ubiquitousLanguage:
+      - "ツイート"
+      - "予約"
+      - "投稿"
+      - "キュー"
+      - "ステータス"
+      - "画像リンク"
+      - "エラーログ"
+      - "リトライ回数"
+      - "恒久エラー"
+
+  functionalRequirements:
+    - id: "FR-001"
+      name: "ツイート一括登録機能"
+      description: |
+        指定されたCSV/スプレッドシート形式のファイルをアップロードし、複数のツイートを一度に予約登録できること。
+        バリデーションルール：
+        - 必須カラム（ツイート本文、投稿予約日時）の存在チェック。
+        - ツイート本文の文字数チェック。本文中に含まれるURLは、Twitterの仕様に従い固定長（23文字）としてカウントすること。
+        - 投稿予約日時のフォーマットチェック。
+    - id: "FR-002"
+      name: "ツイート個別操作機能"
+      description: "管理画面からツイートを1件ずつ新規登録、編集、削除できること。編集・削除は「未投稿」ステータスのツイートのみ可能とすること。"
+    - id: "FR-003"
+      name: "予約ツイート自動投稿機能"
+      description: "指定された間隔で、投稿時刻を過ぎた未投稿ツイートを自動的に投稿すること。"
+    - id: "FR-004"
+      name: "投稿結果ステータス更新機能"
+      description: "投稿が成功した場合、ステータスを「投稿済」に更新し、投稿日時を記録すること。失敗した場合はステータスを更新しない。"
+    - id: "FR-005"
+      name: "画像投稿機能"
+      description: "スプレッドシートで指定されたGoogleドライブのURL（最大4つ）から画像ファイルを取得し、ツイートに添付して投稿できること。"
+    - id: "FR-006"
+      name: "エラーログ記録機能"
+      description: "投稿処理に失敗した場合、日時、対象のツイートID、APIから返却されたエラーメッセージを、別の専用エラーログシートに追記すること。"
+    - id: "FR-007"
+      name: "無限リトライ防止機能"
+      description: "投稿失敗時にリトライ回数を記録・更新し、上限に達したツイートはステータスを「恒久エラー」に変更して処理対象から除外すること。"
+
+  nonFunctionalRequirements:
+    performanceAndAvailability:
+      throughput: "週5,000件、1日あたり約715件の投稿を安定して処理できること。"
+      rateLimitConsideration: "コンテンツ管理者は、Twitterのレートリミットを考慮して投稿予約の日時を計画・分散させる責務を負う。"
+      transactionality: "本システムはGoogleスプレッドシートをデータストアとして利用するため、厳密なトランザクションは保証しない。Twitterへの投稿成功とスプレッドシートへのステータス更新の間に障害が発生した場合の、稀な重複投稿リスクは許容する。"
+    maintainabilityAndScalability:
+      decoupling: "ドメインロジックと、インフラストラクチャ（Googleスプレッドシート、Twitter API）を明確に分離する（クリーンアーキテクチャ）。"
+      dependencyInversion: "ドメイン層は、インフラストラクチャ層に直接依存せず、インターフェースを介して依存する。"
+    testability:
+      unitTestableDomain: "ドメインロジックは、外部ライブラリに依存しない単体のユニットテストで完全に検証可能であること。"
+      mockableInfrastructure: "Googleスプレッドシート、Googleドライブ、Twitter APIと連携する部分は、ラッパーを作成しモック化を容易にすること。"
+    security:
+      credentialManagement: "Twitter APIおよびGoogle Drive APIの認証情報は、Google Apps Scriptのプロパティサービス等を利用し、コード内にハードコーディングしない。"
+      accessControl: "管理画面へのアクセスは、Googleアカウントによる認証・認可で保護する。"
+      futureApiAuth: "将来のAPI連携は、リクエストヘッダーに固定のAPIキーを含めるシンプルな認証方式を想定する。"
+
+  acceptanceCriteria:
+    - targetRequirement: "FR-001 (URL文字数チェック)"
+      scenarios:
+        - "Given: 本文270文字＋長いURL1つを含むツイートデータがある"
+          "When: 一括登録を行う"
+          "Then: URLを23文字として計算した結果、文字数超過とならないため、正常に登録される"
+    - targetRequirement: "FR-005 (画像投稿)"
+      scenarios:
+        - "Given: 1件の有効なGoogleドライブ画像URLが指定されたツイートがある"
+          "When: 自動投稿エンジンが実行される"
+          "Then: テキストと画像が添付されたツイートが投稿され、ステータスが「投稿済」になる"
+    - targetRequirement: "FR-007 (無限リトライ防止)"
+      scenarios:
+        - "Given: リトライ回数が2回で上限が3回の「未投稿」ツイートがあり、投稿に失敗する状況"
+          "When: 自動投稿エンジンが実行される"
+          "Then: リトライ回数が3回に更新され、ステータスが「恒久エラー」に変更される"
+        - "Given: ステータスが「恒久エラー」のツイートがある"
+          "When: 自動投稿エンジンが実行される"
+          "Then: そのツイートは処理対象とならず、Twitterへの投稿も試みられない"
+
+  glossary:
+    - term: "ツイート (Tweet)"
+      description: "投稿されるコンテンツと、その状態（予約日時、ステータス等）を管理する基本単位。本システムの中心的なエンティティ。"
+    - term: "投稿キュー"
+      description: "予約されたツイートが登録される待ち行列。実体はGoogleスプレッドシート上の特定のシートを指す。"
+    - term: "恒久エラー (Permanent Error)"
+      description: "リトライ上限に達するなど、システムが回復不能と判断したエラー状態。"
+
+  constraintsAndAssumptions:
+    technicalConstraints:
+      - "技術基盤としてGoogle Workspace (Googleスプレッドシート, Google Apps Script) を採用する。"
+      - "Google Drive APIおよびTwitter APIの利用規約・レートリミットを遵守する。"
+    operationalAssumptions:
+      - "ツイート本文は、本システムに登録される前に完成しているものとする。"
+      - "Googleドライブ上の画像ファイルは、本システムのGoogle Apps Script実行者がアクセス可能な権限設定がされていることを前提とする。"
+      - "開発・運用は、段階的に進める（MVP：自動投稿 → 次期フェーズ：管理画面、API連携）。"
+
+  configurationManagement:
+    purpose: "ハードコーディングを避け、将来の変更に柔軟に対応するため、調整可能なパラメータは設定として管理する。"
+    items:
+      - parameter: "retryLimit"
+        description: "投稿を再試行する最大回数"
+        defaultValue: 3
