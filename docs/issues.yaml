@@ -1,0 +1,247 @@
+# -------------------------------------------------------------------
+# GitHub Issues & Milestones for HatoLink Project
+# -------------------------------------------------------------------
+
+milestones:
+  - name: "Release-1: MVP - 最速テキスト投稿"
+    goal: "「スプレッドシートに書いたテキストが、とにかく自動で投稿される」状態を実現し、コア価値を最速で検証する。"
+  - name: "Release-2: 運用基盤の確立"
+    goal: "スプレッドシートを使った手動でのデータ管理を可能にし、基本的なエラーハンドリングを導入して信頼性のある運用を開始する。"
+  - name: "Release-3: 機能拡張フェーズ"
+    goal: "運用のフィードバックを元に、エンゲージメント向上施策や、さらなる運用効率化を進める。"
+
+labels:
+  - category: "Type"
+    items:
+      - "type:user-story"
+      - "type:technical-task"
+      - "type:chore"
+      - "type:test"
+  - category: "Layer"
+    items:
+      - "layer:domain"
+      - "layer:usecase"
+      - "layer:adapter-db"
+      - "layer:adapter-api"
+      - "layer:adapter-infrastructure"
+      - "layer:adapter-ui"
+      - "layer:infrastructure"
+  - category: "Epic"
+    items:
+      - "epic:core-engine"
+      - "epic:content-management"
+      - "epic:platform"
+  - category: "DDD"
+    items:
+      - "ddd:modeling"
+      - "ddd:aggregate"
+      - "ddd:value-object"
+      - "ddd:repository"
+  - category: "Priority"
+    items:
+      - "priority:P0-must-have"
+      - "priority:P1-should-have"
+      - "priority:P2-could-have"
+  - category: "Status"
+    items:
+      - "TDD"
+      - "blocked"
+      - "needs-discussion"
+
+issues:
+  - title: "[TechTask] プロジェクト基盤のセットアップ（クリーンアーキテクチャ） (TASK-001)"
+    description: "Google Apps Scriptプロジェクトの初期設定を行い、クリーンアーキテクチャに基づいた開発基盤を構築する。"
+    implementation_tasks:
+      - "claspを利用してGoogle Apps Scriptプロジェクトを作成し、ローカル開発環境を整備する。"
+      - "クリーンアーキテクチャに基づいたディレクトリ構造（例: domain, usecase, adapter, infrastructure）を作成する。"
+      - "GAS用のテストフレームワーク（例: GasT）を導入し、テスト実行の仕組みを整える。"
+    acceptance_criteria:
+      - "定義されたディレクトリ構造でプロジェクトが初期化されていること。"
+      - "サンプルのテストコードが実行でき、成功すること。"
+    related_requirement: "TASK-001"
+    dependencies: []
+    milestone: "Release-1: MVP - 最速テキスト投稿"
+    labels:
+      - "type:technical-task"
+      - "layer:infrastructure"
+      - "epic:platform"
+      - "priority:P0-must-have"
+
+  - title: "[TechTask] Twitter APIアダプタの実装 (TASK-002)"
+    description: "Twitter APIとの通信を担うアダプタを、クリーンアーキテクチャの原則に従い実装する。"
+    implementation_tasks:
+      - "usecaseレイヤーにTwitter APIとの通信を抽象化する`ITwitterApi`インターフェースを定義する。"
+      - "adapter-apiレイヤーに`TwitterApiAdapter`クラスを作成し、`ITwitterApi`を実装する。"
+      - "GASの`UrlFetchApp`を用いて、ツイート投稿APIを呼び出す処理を実装する。"
+      - "Twitter APIの認証情報をGASの`PropertiesService`で安全に管理する仕組みを実装する。"
+      - "(TDD) `TwitterApiAdapter`の単体テストを作成する。API通信部分はモック化すること。"
+    acceptance_criteria:
+      - "`ITwitterApi`インターフェースの仕様を満たすこと。"
+      - "認証情報がコードにハードコーディングされていないこと。"
+      - "作成したテストがすべて成功すること。"
+    related_requirement: "TASK-002"
+    dependencies:
+      - "TASK-001"
+    milestone: "Release-1: MVP - 最速テキスト投稿"
+    labels:
+      - "type:technical-task"
+      - "layer:adapter-api"
+      - "layer:usecase"
+      - "epic:platform"
+      - "priority:P0-must-have"
+      - "TDD"
+
+  - title: "[Domain] ツイート集約のドメインモデル実装 (US-001)"
+    description: "ユーザーストーリー`US-001`の中核となる`ツイート`のドメインモデルを実装する。`requirements.yaml`のドメインモデル定義も参照すること。"
+    implementation_tasks:
+      - "`Tweet`集約ルートエンティティを実装する (id, body, status, scheduledAtなど)。"
+      - "`TweetBody`や`PostStatus`などの値オブジェクトを実装し、不変条件（文字数制限など）をカプセル化する。"
+      - "`Tweet`エンティティの状態を変更するドメインロジック（例: `markAsPosted()`）を実装する。"
+      - "(TDD) `Tweet`エンティティと関連する値オブジェクトの単体テストを作成する。"
+    acceptance_criteria:
+      - "`Tweet`が自身の不変条件（ステータスの遷移など）を維持できること。"
+      - "`TweetBody`が文字数制限のルールを正しく検証できること。"
+      - "単体テストのカバレッジが目標値を満たしていること。"
+    related_requirement: "US-001"
+    dependencies:
+      - "TASK-001"
+    milestone: "Release-1: MVP - 最速テキスト投稿"
+    labels:
+      - "type:user-story"
+      - "layer:domain"
+      - "epic:core-engine"
+      - "priority:P0-must-have"
+      - "TDD"
+      - "ddd:modeling"
+      - "ddd:aggregate"
+
+  - title: "[Adapter] スプレッドシート用TweetRepositoryの実装 (US-001)"
+    description: "`Tweet`集約をGoogleスプレッドシートに永続化するためのリポジトリアダプタを実装する。"
+    implementation_tasks:
+      - "usecaseレイヤーに`ITweetRepository`インターフェースを定義する (`findByStatus...`, `save`など)。"
+      - "adapter-dbレイヤーに`SpreadsheetTweetRepository`クラスを作成し、インターフェースを実装する。"
+      - "GASの`SpreadsheetApp`を使い、シートのデータを`Tweet`オブジェクトへマッピングする処理を実装する。"
+      - "`Tweet`オブジェクトの変更をシートへ書き戻す処理を実装する。"
+      - "(TDD) スプレッドシートをモック、またはテスト用シートを用意して、リポジトリの結合テストを作成する。"
+    acceptance_criteria:
+      - "`ITweetRepository`のインターフェース仕様を満たすこと。"
+      - "スプレッドシートとの間で`Tweet`集約の読み書きが正しく行えること。"
+      - "作成したテストがすべて成功すること。"
+    related_requirement: "US-001"
+    dependencies:
+      - "[Domain] ツイート集約のドメインモデル実装 (US-001)"
+    milestone: "Release-1: MVP - 最速テキスト投稿"
+    labels:
+      - "type:technical-task"
+      - "layer:adapter-db"
+      - "layer:usecase"
+      - "epic:core-engine"
+      - "priority:P0-must-have"
+      - "TDD"
+      - "ddd:repository"
+
+  - title: "[UseCase] 予約ツイート自動投稿ユースケースの実装 (US-001)"
+    description: "予約日時を過ぎた未投稿ツイートを検索し、投稿を実行するユースケースを実装する。"
+    implementation_tasks:
+      - "`usecase`レイヤーに`PostScheduledTweetsUseCase`を実装する。"
+      - "`ITweetRepository`と`ITwitterApi`のインターフェースに依存するように設計する。"
+      - "実装ロジック: 1. `ITweetRepository`を使い、投稿対象のツイートを取得する。 2. 取得した各ツイートに対し、`ITwitterApi`を呼び出して投稿する。 3. 成功した場合、`Tweet`エンティティのステータスを更新し、`ITweetRepository`で保存する。"
+      - "(TDD) リポジトリとAPIアダプタをモックし、ユースケースの単体テストを作成する。"
+    acceptance_criteria:
+      - "投稿キュー（スプレッドシート）の指定した時刻を過ぎた「未投稿」ステータスのツイートが、Twitterに正しく投稿されること。"
+      - "投稿が成功した場合、該当ツイートのステータスが「投稿済」に更新され、「投稿完了日時」が記録されること。"
+    related_requirement: "US-001"
+    dependencies:
+      - "[Domain] ツイート集約のドメインモデル実装 (US-001)"
+      - "[TechTask] Twitter APIアダプタの実装 (TASK-002)"
+      - "[Adapter] スプレッドシート用TweetRepositoryの実装 (US-001)"
+    milestone: "Release-1: MVP - 最速テキスト投稿"
+    labels:
+      - "type:user-story"
+      - "layer:usecase"
+      - "epic:core-engine"
+      - "priority:P0-must-have"
+      - "TDD"
+
+  - title: "[Infra] 定期実行トリガーの設定 (US-001)"
+    description: "`PostScheduledTweetsUseCase`を定期的に実行するためのトリガーを設定する。"
+    implementation_tasks:
+      - "ユースケースを実行するトップレベルの関数（エントリーポイント）を作成する。"
+      - "GASの`ScriptApp`サービスを使い、時間ベースのトリガー（例: 10分ごと）を設定する。"
+    acceptance_criteria:
+      - "指定した間隔で自動投稿の処理が実行されること。"
+    related_requirement: "US-001"
+    dependencies:
+      - "[UseCase] 予約ツイート自動投稿ユースケースの実装 (US-001)"
+    milestone: "Release-1: MVP - 最速テキスト投稿"
+    labels:
+      - "type:chore"
+      - "layer:infrastructure"
+      - "epic:core-engine"
+      - "priority:P0-must-have"
+      
+  - title: "[Adapter] スプレッドシートの直接編集に対応 (US-005a)"
+    description: "ユーザーストーリー`US-005a`を実装する。コンテンツ管理者がスプレッドシートを直接編集・追加・削除した内容を、システムが正しく認識できるように`SpreadsheetTweetRepository`を改修する。"
+    implementation_tasks:
+      - "新規追加された行を新しい`Tweet`として認識するロジックをリポジトリに追加する。"
+      - "既存の行の内容変更を検知し、`Tweet`オブジェクトに反映させるロジックを実装する。"
+      - "行が削除された場合に、それを予約キャンセルとして扱うロジックを実装する。"
+      - "(TDD) コンテンツ管理者の手動操作をシミュレートしたテストケースを拡充する。"
+    acceptance_criteria:
+      - "スプレッドシートに新しい行を追加し、必要な項目を埋めると、それが新しい予約ツイートとして認識されること。"
+      - "「未投稿」ステータスのツイートの行情報をスプレッドシート上で変更すると、予約内容が更新されること。"
+      - "「未投稿」ステータスのツイートの行をスプレッドシートから削除すると、予約がキャンセルされること。"
+    related_requirement: "US-005a"
+    dependencies:
+      - "[Adapter] スプレッドシート用TweetRepositoryの実装 (US-001)"
+    milestone: "Release-2: 運用基盤の確立"
+    labels:
+      - "type:user-story"
+      - "layer:adapter-db"
+      - "epic:content-management"
+      - "priority:P1-should-have"
+      - "TDD"
+
+  - title: "[Adapter] エラーログ用リポジトリの実装 (US-003)"
+    description: "ユーザーストーリー`US-003`の一部として、投稿失敗時のエラー情報を記録するためのリポジトリとアダプタを実装する。"
+    implementation_tasks:
+      - "エラー情報を保持する`ErrorLog`オブジェクトを`domain`レイヤーに定義する（エンティティ or 値オブジェクト）。"
+      - "`usecase`レイヤーに`IErrorLogRepository`インターフェースを定義する。"
+      - "`adapter-db`レイヤーに`SpreadsheetErrorLogRepository`を実装し、エラー情報を専用のエラーログシートに追記する処理を実装する。"
+      - "(TDD) `SpreadsheetErrorLogRepository`のテストを作成する。"
+    acceptance_criteria:
+      - "エラー情報（日時、ツイートID、エラー理由）が指定のシートに正しく追記されること。"
+    related_requirement: "US-003"
+    dependencies:
+      - "TASK-001"
+    milestone: "Release-2: 運用基盤の確立"
+    labels:
+      - "type:technical-task"
+      - "layer:adapter-db"
+      - "layer:domain"
+      - "epic:core-engine"
+      - "priority:P1-should-have"
+      - "TDD"
+
+  - title: "[UseCase] 投稿失敗時のエラー記録ロジックを追加 (US-003)"
+    description: "ユーザーストーリー`US-003`のコアロジック。`PostScheduledTweetsUseCase`を拡張し、投稿失敗時のエラー記録処理を追加する。"
+    implementation_tasks:
+      - "`PostScheduledTweetsUseCase`に`IErrorLogRepository`を注入する。"
+      - "`ITwitterApi`の呼び出し部分に`try-catch`を追加し、例外処理を実装する。"
+      - "`catch`ブロック内で`IErrorLogRepository`を呼び出し、エラー情報を記録する。"
+      - "失敗した`Tweet`のステータスを「失敗」に更新し、`ITweetRepository`で永続化する。"
+      - "(TDD) APIアダプタが例外をスローするケースのテストを追加し、エラーログ記録とステータス更新が正しく行われることを検証する。"
+    acceptance_criteria:
+      - "Twitter APIへの投稿が失敗した場合、専用のエラーログシートに「日時」「対象ツイートの内容（またはID）」「エラー理由」が記録されること。"
+      - "投稿に失敗した元のツイートのステータスが「失敗」に更新されること。"
+    related_requirement: "US-003"
+    dependencies:
+      - "[UseCase] 予約ツイート自動投稿ユースケースの実装 (US-001)"
+      - "[Adapter] エラーログ用リポジトリの実装 (US-003)"
+    milestone: "Release-2: 運用基盤の確立"
+    labels:
+      - "type:user-story"
+      - "layer:usecase"
+      - "epic:core-engine"
+      - "priority:P1-should-have"
+      - "TDD"

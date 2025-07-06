@@ -1,0 +1,48 @@
+- rule_id: "CR-001"
+  title: "クリーンアーキテクチャのディレクトリ構造を遵守する"
+  description: "プロジェクトの保守性とテスト容易性を維持するため、ソースコードは必ず`domain`, `usecase`, `adapter`, `infrastructure`の各レイヤーに適切に配置する。依存関係のルール（内側から外側へは依存しない）を厳守すること。"
+  category: "設計原則"
+  example_bad: |
+    # main.gs (infrastructure)
+    # ドメインロジックやAPI通信のロジックが混在している
+    function postTweet() {
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Queue");
+      const data = sheet.getRange("A2").getValue();
+      // 文字数チェックなどのドメインロジック
+      if (data.length > 140) {
+        throw new Error("文字数オーバー");
+      }
+      // API通信
+      UrlFetchApp.fetch("https://api.twitter.com/...", ...);
+    }
+  example_good: |
+    # hatolink/infrastructure/triggers.js (エントリーポイント)
+    import { PostScheduledTweetsUseCase } from '../usecase/PostScheduledTweetsUseCase';
+    
+    function runPostScheduledTweets() {
+      const useCase = new PostScheduledTweetsUseCase(/* 依存性の注入 */);
+      useCase.execute();
+    }
+- rule_id: "CR-002"
+  title: "テストディレクトリの運用ルールを明確化する"
+  description: "テストコードは/app/tests配下に集約し、アプリケーション本体と分離して管理する。テストの配置場所や命名規則を統一し、可搬性・保守性を高める。"
+  category: "テスト運用"
+  example_bad: |
+    # hatolink/infrastructure/tests/sample.test.js
+    // 本体ディレクトリ内にテストが混在している
+  example_good: |
+    # /app/tests/sample.test.js
+    // すべてのテストは/app/tests配下に集約
+- rule_id: "CR-003"
+  title: "ドキュメント・計画・レビューの一元管理"
+  description: "test_requirements.md, coding-rules.yml, 各種計画・レビューリクエスト等のドキュメントはdocs配下に整理し、用途ごとにサブディレクトリ（plans, reviews等）を設けて管理する。"
+  category: "ドキュメント運用"
+  example_bad: |
+    # /app/test_requirements.md
+    # /app/coding-rules.yml
+    # /app/TASK-001-plan.yml
+  example_good: |
+    # /app/docs/test_requirements.md
+    # /app/docs/coding-rules.yml
+    # /app/docs/plans/TASK-001-plan.yml
+    # /app/docs/reviews/review-request-TASK-001.md
