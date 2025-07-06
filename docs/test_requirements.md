@@ -80,3 +80,16 @@
     - 全テストが成功する
   note: |
     既存要件と重複・矛盾なし（2025-07-06時点確認済み）
+
+- id: TR-INFRA-003
+  title: "エントリーポイントで依存性が正しく注入されること"
+  description: |
+    infrastructure層のエントリーポイント（triggers.js）で、SpreadsheetTweetRepositoryおよびTwitterApiAdapterが正しくインスタンス化され、PostScheduledTweetsUseCaseに依存性注入されていることを検証する。
+    これにより、クリーンアーキテクチャの依存性逆転原則と、テスト容易性・保守性の向上を担保する。
+  related_issue: "TASK-003"
+  acceptance_criteria:
+    - triggers.jsのrunPostScheduledTweets関数で、SpreadsheetTweetRepositoryとTwitterApiAdapterが正しくインスタンス化され、PostScheduledTweetsUseCaseに注入されている
+    - SpreadsheetTweetRepositoryのコンストラクタに必要な依存性（spreadsheetService等）がエントリーポイントで解決されている
+    - テストで依存性注入の正しさが検証され、全てのテストがパスする
+  note: |
+    既存要件との重複・矛盾なし（2025-07-06時点確認済み）

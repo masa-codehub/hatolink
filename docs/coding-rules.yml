@@ -162,3 +162,23 @@
         .everyMinutes(10)
         .create();
     }
+- rule_id: "CR-009"
+  title: "依存性の注入(DI)はアプリケーションのエントリーポイントで行う"
+  description: "DIコンテナが存在しない環境（例: Google Apps Scriptのトリガー関数）では、アプリケーションのエントリーポイント（＝インフラ層の起点）がDIコンテナの役割を担う。ここで各レイヤーの具象クラスをインスタンス化し、依存関係を解決・注入することで、アプリケーション全体の関心を分離し、テスト容易性を高める。"
+  category: "設計原則"
+  example_bad: |
+    # UseCase層で具象クラスを直接newしている
+    class SomeUseCase {
+      constructor() {
+        this.repository = new ConcreteRepository(); // 依存性のルール違反
+      }
+      execute() { /* ... */ }
+    }
+  example_good: |
+    # エントリーポイントで依存性を注入する
+    # infrastructure/main.js
+    function main() {
+      const repository = new ConcreteRepository();
+      const useCase = new SomeUseCase(repository);
+      useCase.execute();
+    }
