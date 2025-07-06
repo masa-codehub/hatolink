@@ -86,3 +86,27 @@
       // 失敗時の処理（ログ記録など）
       Logger.log(`API error: ${responseCode} - ${response.getContentText()}`);
     }
+- rule_id: "CR-006"
+  title: "ドメインの不変条件はドメインレイヤーでカプセル化する"
+  description: "エンティティや値オブジェクトが持つべきビジネスルール（不変条件）は、必ずドメインレイヤー内で検証・保証されなければならない。Use Case層やAdapter層でドメインのルールをチェックするようなコードは、責務の漏洩であり、モデルの価値を破壊するため禁止する。"
+  category: "設計原則"
+  example_bad: |
+    # UseCase層で文字数チェックを行っている悪い例
+    class PostTweetUseCase {
+      execute(tweetData) {
+        if (tweetData.body.length > 140) { // ドメインのルールが漏洩している
+          throw new Error("文字数超過");
+        }
+        // ...
+      }
+    }
+  example_good: |
+    # ドメイン層(値オブジェクト)で文字数チェックを完結させている良い例
+    class TweetBody {
+      constructor(body) {
+        if (body.length > 140) {
+          throw new Error("文字数超過");
+        }
+        this.value = body;
+      }
+    }
