@@ -22,3 +22,16 @@
     - Twitter APIへの投稿が失敗した場合、エンティティのステータスが更新されないこと
   note: |
     既存要件との重複・矛盾なし（2025-07-06時点確認済み）
+
+- id: TR-ADAPTER-001
+  title: "Twitter APIアダプタが、仕様通りに動作し、安全に認証情報を扱えること"
+  description: |
+    クリーンアーキテクチャの原則に従い、usecaseレイヤーのITwitterApiインターフェースとadapter-apiレイヤーのTwitterApiAdapter実装が、
+    1) ツイート投稿API呼び出し、2) 認証情報の安全な管理、3) テスト容易性（UrlFetchApp/PropertiesServiceのモック化）を満たすことを検証する。
+  related_issue: "TASK-002"
+  acceptance_criteria:
+    - ITwitterApiインターフェースの仕様を満たす
+    - 認証情報がコードにハードコーディングされていない
+    - UrlFetchApp, PropertiesServiceの呼び出しがモック化されたテストが全て成功する
+  note: |
+    既存要件との重複・矛盾なし（2025-07-06時点確認済み）
