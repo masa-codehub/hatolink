@@ -1,0 +1,175 @@
+# -------------------------------------------------------------------
+# アジャイル要求リスト：補助金・助成金情報 Twitter自動投稿システム
+# バージョン: 1.0 (優先順位付け済み)
+# 作成日: 2025-07-05
+# -------------------------------------------------------------------
+apiVersion: v1.0
+kind: AgileRequirementsList
+metadata:
+  name: "Subsidy-Info-Twitter-Auto-Poster-Backlog"
+  description: "アジャイル開発チーム向けのプロダクトバックログとリリース計画"
+
+spec:
+  productVision:
+    purpose: "手動での情報発信プロセスを自動化し、効率性と即時性を向上させ、サービスのリーチと価値を最大化する。"
+    targetUser: "コンテンツ管理者"
+    coreValue: "タイムリーな情報発信による機会損失の防止と、運用工数の劇的な削減。"
+
+  epics:
+    - id: "EPIC-01"
+      name: "MVP - コア自動投稿エンジン"
+      description: "スプレッドシートをデータソースとした、システムの心臓部となる自動投稿機能の実現にフォーカスするエピック。"
+    - id: "EPIC-02"
+      name: "運用効率化 - コンテンツ管理"
+      description: "コンテンツ管理者が手動で、かつ効率的に投稿を管理するための機能群。"
+    - id: "EPIC-03"
+      name: "基盤構築と信頼性向上"
+      description: "システムの品質、保守性、セキュリティを確保するための技術的なタスク群。"
+
+  productBacklog:
+    # --- P0 (Must Have) ---
+    - id: "US-001"
+      type: "User Story"
+      priority: "P0 - Must Have"
+      title: "基本的なテキストツイートの自動投稿"
+      story: |
+        コンテンツ管理者として、予約日時を過ぎたテキストのみのツイートが自動で投稿されてほしい。
+        それは、手動での投稿作業から解放され、タイムリーな情報発信に集中するためだ。
+      acceptanceCriteria:
+        - "投稿キュー（スプレッドシート）の指定した時刻を過ぎた「未投稿」ステータスのツイートが、Twitterに正しく投稿されること。"
+        - "投稿が成功した場合、該当ツイートのステータスが「投稿済」に更新され、「投稿完了日時」が記録されること。"
+      referenceId: "FR-003, FR-004"
+      epicId: "EPIC-01"
+      relatedLayers: ["UseCase", "Domain", "Adapter-DB", "Adapter-API"]
+      storyPoints: 5
+      dependencies: ["TASK-001", "TASK-002"]
+
+    - id: "TASK-001"
+      type: "Technical Task"
+      priority: "P0 - Must Have"
+      title: "プロジェクト基盤のセットアップ（クリーンアーキテクチャ）"
+      description: "Google Apps Scriptプロジェクトを作成し、クリーンアーキテクチャに基づいたディレクトリ構造（Domain, UseCase, Adapter等）とテストフレームワークを整備する。"
+      referenceId: "nonFunctionalRequirements (maintainability, testability)"
+      epicId: "EPIC-03"
+      relatedLayers: ["Infrastructure"]
+      storyPoints: 3
+      dependencies: []
+
+    - id: "TASK-002"
+      type: "Technical Task"
+      priority: "P0 - Must Have"
+      title: "外部APIアダプタの実装（Twitter API）"
+      description: "Twitter APIと通信するための、インターフェースに基づいたモック化可能なラッパー（アダプタ）を実装する。認証情報はプロパティサービスで管理する。"
+      referenceId: "nonFunctionalRequirements (testability, security)"
+      epicId: "EPIC-03"
+      relatedLayers: ["Adapter-API", "Infrastructure"]
+      storyPoints: 2
+      dependencies: ["TASK-001"]
+
+    # --- P1 (Should Have) ---
+    - id: "US-005a"
+      type: "User Story"
+      priority: "P1 - Should Have"
+      title: "スプレッドシートでの個別ツイート管理"
+      story: |
+        コンテンツ管理者として、Googleスプレッドシートを直接編集することで、ツイートを個別に予約・編集・削除したい。
+        それは、専用UIがなくても、すぐに柔軟な運用を開始するためだ。
+      acceptanceCriteria:
+        - "スプレッドシートに新しい行を追加し、必要な項目を埋めると、それが新しい予約ツイートとして認識されること。"
+        - "「未投稿」ステータスのツイートの行情報をスプレッドシート上で変更すると、予約内容が更新されること。"
+        - "「未投稿」ステータスのツイートの行をスプレッドシートから削除すると、予約がキャンセルされること。"
+      referenceId: "FR-002"
+      epicId: "EPIC-02"
+      relatedLayers: ["Adapter-DB"]
+      storyPoints: 2
+      dependencies: ["TASK-001"]
+
+    - id: "US-003"
+      type: "User Story"
+      priority: "P1 - Should Have"
+      title: "投稿失敗の記録"
+      story: |
+        コンテンツ管理者として、ツイートの投稿に失敗した場合、その事実がログとして記録されてほしい。
+        それは、どの投稿が落ちたのかを後から追跡できるようにするためだ。
+      acceptanceCriteria:
+        - "Twitter APIへの投稿が失敗した場合、専用のエラーログシートに「日時」「対象ツイートの内容（またはID）」「エラー理由」が記録されること。"
+        - "投稿に失敗した元のツイートのステータスが「失敗」に更新されること。"
+        - "システムが自動で再投稿を試みることはない。"
+      referenceId: "FR-006, FR-007 (簡易化)"
+      epicId: "EPIC-01"
+      relatedLayers: ["UseCase", "Adapter-DB"]
+      storyPoints: 2
+      dependencies: ["US-001"]
+
+    # --- P2 (Could Have - バックログアイテム) ---
+    - id: "US-002"
+      type: "User Story"
+      priority: "P2 - Could Have"
+      title: "画像付きツイートの自動投稿"
+      story: |
+        コンテンツ管理者として、ツイートに画像を添付して投稿したい。
+        それは、視覚的な情報を加えてエンゲージメントを高めるためだ。
+      acceptanceCriteria:
+        - "GoogleドライブのURLが1〜4件指定されたツイートが、画像付きで正しく投稿されること。"
+      referenceId: "FR-005"
+      epicId: "EPIC-01"
+      relatedLayers: ["UseCase", "Adapter-API", "Adapter-Infrastructure"]
+      storyPoints: 3
+      dependencies: ["US-001", "TASK-003"]
+    
+    - id: "TASK-003"
+      type: "Technical Task"
+      priority: "P2 - Could Have"
+      title: "外部インフラアダプタの実装（Google Drive API）"
+      description: "Google Drive APIと通信し、指定されたURLから画像ファイルを取得するためのモック化可能なラッパー（アダプタ）を実装する。"
+      referenceId: "FR-005"
+      epicId: "EPIC-03"
+      relatedLayers: ["Adapter-Infrastructure"]
+      storyPoints: 2
+      dependencies: ["TASK-001"]
+
+    - id: "US-004"
+      type: "User Story"
+      priority: "P2 - Could Have"
+      title: "スプレッドシートでのツイート一括予約（UI経由）"
+      story: |
+        コンテンツ管理者として、作成済みのツイートリスト（スプレッドシート）を一度にアップロードして予約したい。
+        それは、毎週発生する大量の投稿準備を効率化するためだ。
+      acceptanceCriteria:
+        - "管理画面からスプレッドシートファイルをアップロードすると、内容が投稿キューに登録されること。"
+        - "本文の文字数チェックが、URLを23文字として計算するロジックで正しく行われること。"
+      referenceId: "FR-001"
+      epicId: "EPIC-02"
+      relatedLayers: ["UseCase", "Adapter-UI", "Adapter-DB"]
+      storyPoints: 5
+      dependencies: ["TASK-001"]
+
+  releasePlan:
+    - id: "Release-1"
+      name: "MVP - 最速テキスト投稿"
+      goal: "「スプレッドシートに書いたテキストが、とにかく自動で投稿される」状態を実現し、コア価値を最速で検証する。"
+      scope:
+        - "US-001"
+        - "TASK-001"
+        - "TASK-002"
+    - id: "Release-2"
+      name: "運用基盤の確立"
+      goal: "スプレッドシートをCMSのように使った手動でのデータ管理を可能にし、基本的なエラーハンドリングを導入して信頼性のある運用を開始する。"
+      scope:
+        - "US-005a"
+        - "US-003"
+    - id: "Release-3"
+      name: "機能拡張フェーズ"
+      goal: "運用のフィードバックを元に、エンゲージメント向上施策や、さらなる運用効率化を進める。"
+      scope:
+        - "US-002"
+        - "US-004"
+        - "TASK-003"
+        # ... and more
+
+  firstSprintPlan:
+    sprintGoal: "手動で準備したスプレッドシート上の単一のテキストツイートを、トリガー実行によってTwitterへ投稿できる状態にする。"
+    sprintBacklog:
+      - "TASK-001: プロジェクト基盤のセットアップ"
+      - "TASK-002: 外部APIアダプタの実装（Twitter API）"
+      - "US-001 の一部（バックエンドロジックとスプレッドシートアダプタの実装）"

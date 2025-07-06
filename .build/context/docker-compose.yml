@@ -1,0 +1,14 @@
+services:
+  service-name:
+    build:
+      context: ./${PROJECT_NAME}/.build
+      dockerfile: Dockerfile
+    image: ${PROJECT_NAME}_image
+    volumes:
+      - ./${PROJECT_NAME}:${CONTAINER_VOLUME:-/app}
+    working_dir: ${CONTAINER_VOLUME:-/app}
+    environment:
+      - PYTHONPATH=${PYTHONPATH:-/app}
+    # command: ["bash", "run.sh"]
+    stdin_open: true
+    tty: true
