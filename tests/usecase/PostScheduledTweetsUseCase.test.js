@@ -1,5 +1,6 @@
 // PostScheduledTweetsUseCase.test.js
 const PostScheduledTweetsUseCase = require('../../hatolink/usecase/PostScheduledTweetsUseCase');
+const Tweet = require('../../hatolink/domain/Tweet');
 
 // モック用クラス
 class MockTweetRepository {
@@ -37,14 +38,19 @@ describe('PostScheduledTweetsUseCase', () => {
   });
 
   it('投稿対象が存在する場合、APIが呼ばれ、ステータス・日時が更新され保存される', async () => {
-    const tweet = { id: 1, status: '未投稿' };
+    const tweet = new Tweet({
+      tweetId: 'id1',
+      body: 'test',
+      status: 'SCHEDULED',
+      scheduledAt: '2025-07-06T12:00:00Z',
+    });
     const repo = new MockTweetRepository([tweet]);
     const api = new MockTwitterApi();
     const useCase = new PostScheduledTweetsUseCase(repo, api);
     await useCase.execute();
     expect(api.called.length).toBe(1);
     expect(repo.saved.length).toBe(1);
-    expect(repo.saved[0].status).toBe('投稿済');
+    expect(repo.saved[0].status.value).toBe('POSTED');
     expect(repo.saved[0].postedAt).toBeInstanceOf(Date);
   });
 
@@ -68,5 +74,25 @@ describe('PostScheduledTweetsUseCase', () => {
     await useCase.execute();
     expect(repo.saved.length).toBe(0);
     expect(tweet.status).toBe('未投稿');
+  });
+
+  it('投稿対象が存在する場合、markAsPostedが呼ばれ、保存される', async () => {
+    const tweet = new Tweet({
+      tweetId: 'id1',
+      body: 'test',
+      status: 'SCHEDULED',
+      scheduledAt: '2025-07-06T12:00:00Z',
+    });
+    const repo = new MockTweetRepository([tweet]);
+    const api = new MockTwitterApi();
+    const useCase = new PostScheduledTweetsUseCase(repo, api);
+    const spy = jest.spyOn(tweet, 'markAsPosted');
+    await useCase.execute();
+    expect(api.called.length).toBe(1);
+    expect(repo.saved.length).toBe(1);
+    expect(spy).toHaveBeenCalled();
+    expect(tweet.status.value).toBe('POSTED');
+    expect(tweet.postedAt).toBeInstanceOf(Date);
+    spy.mockRestore();
   });
 });
