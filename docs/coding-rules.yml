@@ -58,3 +58,31 @@
   example_good: |
     // インターフェースに依存したユースケース
     const useCase = new PostScheduledTweetsUseCase(tweetRepository, twitterApi); // どちらもインターフェース型
+- rule_id: "CR-005"
+  title: "外部API連携における失敗許容設計"
+  description: "UrlFetchAppなどで外部APIと通信する際は、muteHttpExceptionsオプションをtrueに設定し、HTTPエラーステータスコード（4xx, 5xx）を例外としてではなく戻り値としてハンドルすること。これにより、APIの一時的な不調やリクエストの不備が、システム全体の実行停止に直結するのを防ぎ、より柔軟なエラーハンドリングを可能にする。"
+  category: "外部連携"
+  example_bad: |
+    // muteHttpExceptionsが未設定のため、APIが401等を返すとスクリプト全体が例外で停止する
+    try {
+      const response = UrlFetchApp.fetch("https://api.example.com/data");
+      // ... 成功時の処理
+    } catch (e) {
+      // ネットワークエラーは捕捉できるが、HTTPエラーは捕捉できない
+      Logger.log(e);
+    }
+  example_good: |
+    // muteHttpExceptions: true を設定
+    const options = {
+      'method': 'get',
+      'muteHttpExceptions': true
+    };
+    const response = UrlFetchApp.fetch("https://api.example.com/data", options);
+    const responseCode = response.getResponseCode();
+
+    if (responseCode === 200) {
+      // ... 成功時の処理
+    } else {
+      // 失敗時の処理（ログ記録など）
+      Logger.log(`API error: ${responseCode} - ${response.getContentText()}`);
+    }

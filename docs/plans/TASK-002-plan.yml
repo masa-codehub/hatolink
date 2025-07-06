@@ -1,0 +1,29 @@
+# TASK-002 実装計画
+
+issue_id: TASK-002
+issue_title: "[TechTask] Twitter APIアダプタの実装 (TASK-002)"
+related_issue_url: "https://github.com/masa-codehub/hatolink/issues/2"
+definition_of_done:
+  - hatolink/usecase/ITwitterApi.js が作成され、ツイート投稿用メソッド（例: postTweet(tweet)）が定義されている
+  - hatolink/adapter/api/TwitterApiAdapter.js が作成され、ITwitterApiインターフェースを実装している
+  - TwitterApiAdapter はGASのUrlFetchAppを使いTwitter APIにリクエストを送信する
+  - 認証情報はPropertiesServiceから取得し、コードにハードコーディングされていない
+  - tests/adapter/api/TwitterApiAdapter.test.js が作成され、UrlFetchAppやPropertiesServiceの呼び出しがモック化された単体テストが実装されている
+  - 作成した全てのテストがテスト実行コマンドで成功する
+implementation_steps:
+  - step: 1
+    title: "ITwitterApiインターフェースの定義"
+    command: "hatolink/usecase/ITwitterApi.js を新規作成し、ツイート投稿用メソッドを定義する"
+    verification: "インターフェース定義がDoDに沿っているか確認する"
+  - step: 2
+    title: "TwitterApiAdapterクラスの実装"
+    command: "hatolink/adapter/api/TwitterApiAdapter.js を新規作成し、ITwitterApiを実装する。UrlFetchApp, PropertiesServiceを利用する。"
+    verification: "認証情報がハードコーディングされていないこと、インターフェース仕様を満たしていることを確認する"
+  - step: 3
+    title: "単体テストの実装"
+    command: "tests/adapter/api/TwitterApiAdapter.test.js を新規作成し、UrlFetchApp, PropertiesServiceをモック化したテストを実装する"
+    verification: "テストが仕様を網羅し、独立して動作することを確認する"
+  - step: 4
+    title: "テスト実行と修正"
+    command: "テスト実行コマンドで全テストを実行し、失敗した場合は修正する"
+    verification: "全てのテストが成功することを確認する"
