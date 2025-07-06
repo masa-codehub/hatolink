@@ -50,3 +50,18 @@
     - テスト実行コマンドで全てのテストが成功する
   note: |
     既存要件との重複・矛盾なし（2025-07-06時点確認済み）
+
+- id: TR-ADAPTER-002
+  title: "スプレッドシートリポジトリが、仕様通りに動作し、ドメインオブジェクトを永続化できること"
+  description: |
+    クリーンアーキテクチャの原則に従い、adapter-dbレイヤーのSpreadsheetTweetRepositoryが、GoogleスプレッドシートとTweet集約オブジェクト間のマッピング・永続化処理を正しく実装していることを検証する。
+    - ITweetRepositoryインターフェース仕様を満たすこと
+    - スプレッドシートからの取得・保存が正しく行えること
+    - GASのグローバルオブジェクト（SpreadsheetApp等）はadapter層でラップされ、テスト容易性が確保されていること
+  related_issue: "US-001"
+  acceptance_criteria:
+    - SpreadsheetTweetRepositoryがITweetRepositoryインターフェースを正しく実装している
+    - Tweet集約の保存・取得ロジックが網羅的にテストされ、全てのテストが成功する
+    - モック化されたGASオブジェクトでテストが独立して実行できる
+  note: |
+    既存要件（TR-ADAPTER-001）と重複しないことを確認（2025-07-06時点）

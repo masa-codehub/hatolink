@@ -1,0 +1,46 @@
+# US-001-SpreadsheetTweetRepository-plan.yml
+
+issue_id: US-001
+issue_title: "[Adapter] スプレッドシート用TweetRepositoryの実装 (US-001)"
+related_issue_url: "https://github.com/masa-codehub/hatolink/issues/4"
+
+objectives:
+  - usecaseレイヤーにITweetRepositoryインターフェースを定義し、findScheduledTweetsToPost()とsave(tweet)を含める
+  - adapter-dbレイヤーにSpreadsheetTweetRepositoryクラスを作成し、ITweetRepositoryを実装する
+  - GASのSpreadsheetAppを使い、シートのデータとTweetオブジェクトのマッピング処理を実装する
+  - Tweetオブジェクトの変更をシートへ書き戻す処理を実装する
+  - スプレッドシートをモック化したテストを作成し、TDDで実装する
+
+definition_of_done:
+  - hatolink/usecase/ITweetRepository.js が作成され、findScheduledTweetsToPost() と save(tweet) メソッドが定義されている
+  - hatolink/adapter/db/SpreadsheetTweetRepository.js が作成され、ITweetRepositoryインターフェースを実装している
+  - SpreadsheetTweetRepositoryクラスは、Googleスプレッドシートの行データ（配列）とTweetドメインオブジェクトを相互に変換（マッピング）するロジックを持つ
+  - tests/adapter/db/SpreadsheetTweetRepository.test.js が作成され、GASのグローバルオブジェクト（SpreadsheetAppなど）の呼び出しがモック化された単体テストが実装されている
+  - 作成されたテストは、Tweet集約の保存と取得のロジックを網羅し、すべて成功する
+
+implementation_steps:
+  - step: 1
+    title: "ITweetRepositoryインターフェースの作成"
+    command: "hatolink/usecase/ITweetRepository.js を新規作成し、findScheduledTweetsToPost()とsave(tweet)を定義する"
+    verification: "ファイルが正しく作成され、2つのメソッドが定義されていることを確認する"
+  - step: 2
+    title: "SpreadsheetTweetRepositoryクラスの作成（インターフェース実装）"
+    command: "hatolink/adapter/db/SpreadsheetTweetRepository.js を新規作成し、ITweetRepositoryを実装するクラス定義を記述する"
+    verification: "クラスが正しく定義され、ITweetRepositoryをimplementsしていることを確認する"
+  - step: 3
+    title: "スプレッドシート⇔Tweetオブジェクトのマッピング処理実装"
+    command: "SpreadsheetTweetRepositoryに、スプレッドシートの行データとTweetオブジェクトを相互変換するロジックを実装する"
+    verification: "マッピング処理が正しく実装されていることを確認する（テストで検証）"
+  - step: 4
+    title: "Tweetオブジェクトの保存処理実装"
+    command: "SpreadsheetTweetRepositoryに、Tweetオブジェクトの変更をシートへ書き戻すsave処理を実装する"
+    verification: "saveメソッドが正しく実装されていることを確認する（テストで検証）"
+  - step: 5
+    title: "テストコード作成（GASオブジェクトのモック化）"
+    command: "tests/adapter/db/SpreadsheetTweetRepository.test.js を新規作成し、SpreadsheetApp等のGASグローバルオブジェクトをモック化したテストを実装する"
+    verification: "テストが全て成功し、保存・取得ロジックが網羅的に検証されていることを確認する"
+
+notes:
+  - TDDで進めること
+  - 既存のテスト要件（TR-ADAPTER-001）と重複しないよう注意
+  - モック化の際はテスト容易性を最優先

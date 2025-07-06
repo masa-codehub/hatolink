@@ -110,3 +110,28 @@
         this.value = body;
       }
     }
+- rule_id: "CR-007"
+  title: "GASのグローバルオブジェクトはAdapter層でラップし、テスト容易性を確保する"
+  description: "SpreadsheetAppやUrlFetchAppのようなGASのグローバルオブジェクトは、直接呼び出すとテスト時のモック化が困難になる。これらのオブジェクトへのアクセスは必ずAdapter層にカプセル化し、他のレイヤー（特にUseCase層）が直接依存しないように設計すること。これにより、各コンポーネントの単体テストの独立性と信頼性を高める。"
+  category: "テスト設計"
+  example_bad: |
+    # UseCase層が直接SpreadsheetAppに依存している
+    class SomeUseCase {
+      execute() {
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Data");
+        const data = sheet.getRange("A1").getValue();
+        # ...
+      }
+    }
+  example_good: |
+    # Adapter層でラップし、UseCaseはインターフェースに依存する
+    # IDataRepository.js (in usecase layer)
+    class IDataRepository { find() {} }
+
+    # SpreadsheetAdapter.js (in adapter layer)
+    class SpreadsheetAdapter extends IDataRepository {
+      find() {
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Data");
+        return sheet.getRange("A1").getValue();
+      }
+    }
