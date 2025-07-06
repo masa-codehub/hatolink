@@ -35,3 +35,18 @@
     - UrlFetchApp, PropertiesServiceの呼び出しがモック化されたテストが全て成功する
   note: |
     既存要件との重複・矛盾なし（2025-07-06時点確認済み）
+
+- id: TR-DOMAIN-001
+  title: "ツイート集約がドメインのルールを正しく維持できること"
+  description: |
+    ドメインモデル（Tweet集約ルート、TweetBody/ PostStatus値オブジェクト）が、以下の不変条件・ビジネスルールを正しく保証することを検証する。
+    - TweetBody: 文字数制限（URLは23文字換算）を厳密に検証し、違反時は例外をスローする
+    - PostStatus: SCHEDULED→POSTED→PERMANENT_ERRORの正しい状態遷移のみ許可し、不正な遷移は例外とする
+    - Tweet: markAsPosted()等のドメインロジックが、集約の整合性を常に維持する
+  related_issue: "US-001"
+  acceptance_criteria:
+    - Tweet, TweetBody, PostStatusの各値オブジェクト・エンティティ単体テストが存在し、全ての不変条件を網羅している
+    - 受け入れ基準（requirements.yaml記載）を満たすテストケースが実装されている
+    - テスト実行コマンドで全てのテストが成功する
+  note: |
+    既存要件との重複・矛盾なし（2025-07-06時点確認済み）

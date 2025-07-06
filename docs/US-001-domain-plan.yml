@@ -1,0 +1,33 @@
+# US-001-domain-plan.yml
+issue_id: US-001
+issue_title: "[Domain] ツイート集約のドメインモデル実装"
+related_requirements:
+  - docs/requirements.yaml
+  - docs/test_requirements.md
+  - docs/coding-rules.yml
+  - https://github.com/masa-codehub/hatolink/issues/3
+
+definition_of_done:
+  - hatolink/domain/value_objects/配下にTweetBody.js, PostStatus.jsが実装されている
+  - hatolink/domain/配下にTweet.jsが実装されている
+  - Tweet.jsにmarkAsPosted()等のドメインロジックが実装されている
+  - tests/domain/配下にTweet, TweetBody, PostStatusの単体テストが実装されている
+  - テストが受け入れ基準を網羅し、全て成功する
+
+implementation_steps:
+  - step: 1
+    title: "TweetBody値オブジェクトの実装"
+    command: "hatolink/domain/value_objects/TweetBody.jsを新規作成し、文字数制限（URL換算含む）を厳密に検証するTweetBodyクラスを実装する"
+    verification: "TweetBodyの仕様を満たす単体テスト（tests/domain/value_objects/TweetBody.test.js）を作成・実行し、全て成功することを確認"
+  - step: 2
+    title: "PostStatus値オブジェクトの実装"
+    command: "hatolink/domain/value_objects/PostStatus.jsを新規作成し、SCHEDULED→POSTED→PERMANENT_ERRORの正しい状態遷移のみ許可するPostStatusクラスを実装する"
+    verification: "PostStatusの仕様を満たす単体テスト（tests/domain/value_objects/PostStatus.test.js）を作成・実行し、全て成功することを確認"
+  - step: 3
+    title: "Tweet集約ルートエンティティの実装"
+    command: "hatolink/domain/Tweet.jsを新規作成し、TweetBody/PostStatus等の値オブジェクトを利用しつつ、markAsPosted()等のドメインロジックを実装する"
+    verification: "Tweetの仕様を満たす単体テスト（tests/domain/Tweet.test.js）を作成・実行し、全て成功することを確認"
+  - step: 4
+    title: "テストカバレッジ・受け入れ基準の最終検証"
+    command: "全てのテスト（tests/domain/配下）を実行し、test_requirements.mdおよびrequirements.yamlの受け入れ基準を満たすことを確認する"
+    verification: "テスト実行結果を確認し、全て成功していることをもって完了とする"
