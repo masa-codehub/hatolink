@@ -29,6 +29,39 @@ class Tweet {
     }
     this.status = this.status.transition('PERMANENT_ERROR');
   }
+
+  /**
+   * スプレッドシートの行データからTweetオブジェクトを生成
+   * @param {Object} row
+   * @returns {Tweet}
+   */
+  static fromRow(row) {
+    return new Tweet({
+      tweetId: row.tweetId,
+      body: row.body,
+      status: row.status,
+      scheduledAt: row.scheduledAt,
+      postedAt: row.postedAt,
+      retryCount: row.retryCount,
+      imageLinks: row.imageLinks || []
+    });
+  }
+
+  /**
+   * Tweetオブジェクトをスプレッドシートの行データ形式に変換
+   * @returns {Object}
+   */
+  toRow() {
+    return {
+      tweetId: this.tweetId,
+      body: this.body.toString ? this.body.toString() : this.body,
+      status: this.status.toString ? this.status.toString() : this.status,
+      scheduledAt: this.scheduledAt ? this.scheduledAt.toISOString() : '',
+      postedAt: this.postedAt ? this.postedAt.toISOString() : '',
+      retryCount: this.retryCount,
+      imageLinks: this.imageLinks
+    };
+  }
 }
 
 module.exports = Tweet;
