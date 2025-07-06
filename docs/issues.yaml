@@ -49,35 +49,6 @@ labels:
       - "blocked"
 
 issues:
-  - title: "[Refactoring] APIアダプタとUseCase間のエラーハンドリングの不整合を修正 (TASK-004)"
-    description: |
-      技術タスク `TASK-004` を実装する。
-      > 開発者として、UseCaseがAdapterからのAPI失敗応答を確実に検知できるようにしたい。
-      > それは、投稿失敗時に後続の処理（エラーログ記録やステータス更新など）を正しく実行できるようにするためだ。
-      > 現状、Adapterが返すレスポンスオブジェクトをUseCaseが正しく解釈できていない問題を解決する必要がある。
-    implementation_tasks:
-      - "hatolink/adapter/api/TwitterApiAdapter.js の postTweet メソッドを修正し、失敗時に例外をスローするか、明確な失敗を示すオブジェクトを返すようにする。"
-      - "hatolink/usecase/PostScheduledTweetsUseCase.js の execute メソッドを修正し、twitterApi.postTweet の呼び出しを try-catch ブロックで囲む。"
-      - "APIの失敗を検知した場合、後続の tweet.status の更新や tweetRepository.save が呼び出されないようにロジックを修正する。"
-      - "(TDD) tests/usecase/PostScheduledTweetsUseCase.test.js の「APIが失敗した場合」のテストを、実際の修正に合わせて更新・強化する。"
-    acceptance_criteria:
-      - "PostScheduledTweetsUseCaseが、twitterApi.postTweet(tweet)の戻り値（または例外）を評価し、APIの成功・失敗を正しく判断できること。"
-      - "APIがエラー応答を返した場合に、後続のドメインオブジェクトのステータス更新や保存処理が実行されないこと。"
-      - "上記を検証する単体テストがtests/usecase/PostScheduledTweetsUseCase.test.jsに存在すること。"
-    related_requirement: "TASK-004, CR-005"
-    dependencies:
-      - "US-001"
-      - "TASK-003"
-    milestone: "技術的負債の返済"
-    labels:
-      - "type:refactoring"
-      - "type:technical-task"
-      - "layer:usecase"
-      - "layer:adapter-api"
-      - "epic:platform"
-      - "priority:P0-must-have"
-      - "TDD"
-
   - title: "[Refactoring] UseCaseからドメインのメソッドを呼び出すように修正 (TASK-005)"
     description: |
       技術タスク `TASK-005` を実装する。
@@ -314,3 +285,32 @@ Completed:
       - "layer:adapter-db"
       - "epic:platform"
       - "priority:P0-must-have"
+
+  - title: "[Refactoring] APIアダプタとUseCase間のエラーハンドリングの不整合を修正 (TASK-004)"
+    description: |
+      技術タスク `TASK-004` を実装する。
+      > 開発者として、UseCaseがAdapterからのAPI失敗応答を確実に検知できるようにしたい。
+      > それは、投稿失敗時に後続の処理（エラーログ記録やステータス更新など）を正しく実行できるようにするためだ。
+      > 現状、Adapterが返すレスポンスオブジェクトをUseCaseが正しく解釈できていない問題を解決する必要がある。
+    implementation_tasks:
+      - "hatolink/adapter/api/TwitterApiAdapter.js の postTweet メソッドを修正し、失敗時に例外をスローするか、明確な失敗を示すオブジェクトを返すようにする。"
+      - "hatolink/usecase/PostScheduledTweetsUseCase.js の execute メソッドを修正し、twitterApi.postTweet の呼び出しを try-catch ブロックで囲む。"
+      - "APIの失敗を検知した場合、後続の tweet.status の更新や tweetRepository.save が呼び出されないようにロジックを修正する。"
+      - "(TDD) tests/usecase/PostScheduledTweetsUseCase.test.js の「APIが失敗した場合」のテストを、実際の修正に合わせて更新・強化する。"
+    acceptance_criteria:
+      - "PostScheduledTweetsUseCaseが、twitterApi.postTweet(tweet)の戻り値（または例外）を評価し、APIの成功・失敗を正しく判断できること。"
+      - "APIがエラー応答を返した場合に、後続のドメインオブジェクトのステータス更新や保存処理が実行されないこと。"
+      - "上記を検証する単体テストがtests/usecase/PostScheduledTweetsUseCase.test.jsに存在すること。"
+    related_requirement: "TASK-004, CR-005"
+    dependencies:
+      - "US-001"
+      - "TASK-003"
+    milestone: "技術的負債の返済"
+    labels:
+      - "type:refactoring"
+      - "type:technical-task"
+      - "layer:usecase"
+      - "layer:adapter-api"
+      - "epic:platform"
+      - "priority:P0-must-have"
+      - "TDD"

@@ -1,0 +1,32 @@
+issue_id: "TASK-005"
+title: "[Refactoring] UseCaseからドメインのメソッドを呼び出すように修正 (TASK-005)"
+implementation_steps:
+  - step: 1
+    description: "PostScheduledTweetsUseCase.jsのexecuteメソッドでtweet.status = '投稿済'等の直接的な状態変更を行っている箇所を、tweet.markAsPosted()のようなドメインメソッド呼び出しにリファクタリングする"
+    command: |
+      # 該当箇所を修正し、コミット
+      sed -i.bak "s/tweet.status *= *['\"]投稿済['\"]/tweet.markAsPosted()/g" hatolink/usecase/PostScheduledTweetsUseCase.js
+      # 手動で他の直接的な状態変更も確認し、必要に応じて修正
+    verification: |
+      tweet.status = ... のような直接的な状態変更がPostScheduledTweetsUseCase.js内に存在しないことをgrepで確認し、tweet.markAsPosted()が呼ばれていることを確認する
+  - step: 2
+    description: "ドメインエンティティ（Tweet.js）にmarkAsPostedメソッドが正しく実装されていることを確認・必要に応じて修正する"
+    command: |
+      # Tweet.jsのmarkAsPosted実装を確認・修正
+      # 既存のテスト（Tweet.test.js）もパスすることを確認
+    verification: |
+      Tweet.jsにmarkAsPostedメソッドが存在し、状態遷移の不変条件を担保していること。Tweet.test.jsの関連テストが全てパスすること
+  - step: 3
+    description: "PostScheduledTweetsUseCase.test.jsで、投稿成功時にmarkAsPostedメソッドが呼び出されることをスパイ・モックで検証するテストケースを追加・修正する"
+    command: |
+      # テストコードを修正し、markAsPostedの呼び出しをスパイ・モックで検証
+      # テストを実行
+      npm test -- tests/usecase/PostScheduledTweetsUseCase.test.js
+    verification: |
+      markAsPostedメソッドの呼び出しがテストで検証され、全てのテストがパスすること
+  - step: 4
+    description: "全体のテスト要件（test_requirements.md）・コーディングルール（CR-006）との整合性を最終確認する"
+    command: |
+      # test_requirements.md, coding-rules.ymlを再確認
+    verification: |
+      test_requirements.mdのTR-USECASE-001が本リファクタリングの設計意図を反映していること、CR-006が遵守されていることを確認

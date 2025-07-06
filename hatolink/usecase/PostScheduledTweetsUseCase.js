@@ -28,8 +28,7 @@ class PostScheduledTweetsUseCase {
         // 2. Twitter APIで投稿
         await this.twitterApi.postTweet(tweet);
         // 3. 成功時: ステータス・投稿完了日時を更新
-        tweet.status = '投稿済';
-        tweet.postedAt = new Date();
+        tweet.markAsPosted(new Date());
         await this.tweetRepository.save(tweet);
       } catch (e) {
         // 失敗時: ステータスは変更しない、保存処理も行わない
