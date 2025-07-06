@@ -4,12 +4,14 @@
 const { PostScheduledTweetsUseCase } = require('../usecase/PostScheduledTweetsUseCase');
 const { SpreadsheetTweetRepository } = require('../adapter/db/SpreadsheetTweetRepository');
 const { TwitterApiAdapter } = require('../adapter/api/TwitterApiAdapter');
+const SpreadsheetService = require('../adapter/db/SpreadsheetService');
 
 /**
  * PostScheduledTweetsUseCaseを実行するエントリーポイント
  */
 function runPostScheduledTweets() {
-  const tweetRepository = new SpreadsheetTweetRepository();
+  const spreadsheetService = new SpreadsheetService();
+  const tweetRepository = new SpreadsheetTweetRepository(spreadsheetService);
   const twitterApi = new TwitterApiAdapter();
   const useCase = new PostScheduledTweetsUseCase(tweetRepository, twitterApi);
   useCase.execute();

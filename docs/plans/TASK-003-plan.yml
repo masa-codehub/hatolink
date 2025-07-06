@@ -1,0 +1,30 @@
+issue_id: "TASK-003"
+title: "[Refactoring] エントリーポイントにおける依存性注入を修正"
+related_issue_url: "https://github.com/masa-codehub/hatolink/issues/TASK-003"
+definition_of_done:
+  - hatolink/infrastructure/triggers.js の runPostScheduledTweets 関数が修正され、PostScheduledTweetsUseCase に渡される依存オブジェクト (tweetRepository, twitterApi) が正しくインスタンス化されていること
+  - SpreadsheetTweetRepository のコンストラクタに必要な依存性 (spreadsheetServiceなど) が、エントリーポイントで解決され、正しく注入されていること
+  - tests/infrastructure/triggers.test.js が拡張され、依存性の注入が正しく行われることを検証するテストケースが追加され、パスすること
+  - CR-004, CR-007 のコーディングルールが遵守されていること
+implementation_steps:
+  - step: 1
+    description: "test_requirements.md にTR-INFRA-003要件を追記する"
+    command: "追記内容を反映"
+    verification: "既存要件との重複・矛盾がないことを確認"
+  - step: 2
+    description: "triggers.jsのrunPostScheduledTweets関数を修正し、依存性注入をクリーンアーキテクチャ原則に従い実装"
+    command: "triggers.jsを編集"
+    verification: "依存性が正しく注入されているかコードレビュー"
+  - step: 3
+    description: "SpreadsheetTweetRepositoryの依存性（spreadsheetService等）をエントリーポイントで解決し、注入"
+    command: "triggers.jsを編集"
+    verification: "依存性が正しく解決・注入されているかコードレビュー"
+  - step: 4
+    description: "triggers.test.jsに依存性注入のテストケースを追加"
+    command: "triggers.test.jsを編集"
+    verification: "新規テストがパスすること"
+  - step: 5
+    description: "全テストを実行し、DoDを満たすことを確認"
+    command: "テストスイートを実行"
+    verification: "全テストがパスすること"
+internal_log: []
