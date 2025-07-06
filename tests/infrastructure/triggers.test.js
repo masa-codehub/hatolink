@@ -78,21 +78,19 @@ describe('triggers.js', () => {
     it('依存性が正しく注入される', () => {
       called = { service: false, repo: false, api: false, usecase: false, execute: false };
       // モック
-      class MockSpreadsheetService {
+      global.MockSpreadsheetService = class MockSpreadsheetService {
         constructor() { called.service = true; }
-      }
-      class MockRepo {
+      };
+      global.MockRepo = class MockRepo {
         constructor(service) { called.repo = service instanceof MockSpreadsheetService; }
-      }
-      class MockApi { constructor() { called.api = true; } }
-      class MockUseCase {
+      };
+      global.MockApi = class MockApi { constructor() { called.api = true; } };
+      global.MockUseCase = class MockUseCase {
         constructor(repo, api) { called.usecase = repo instanceof MockRepo && api instanceof MockApi; }
         execute() { called.execute = true; }
-      }
-      jest.spyOn(require('../../../hatolink/adapter/db/SpreadsheetService'), 'prototype', 'get').mockReturnValue(MockSpreadsheetService.prototype);
-      jest.spyOn(require('../../../hatolink/adapter/db/SpreadsheetTweetRepository'), 'prototype', 'get').mockReturnValue(MockRepo.prototype);
-      jest.spyOn(require('../../../hatolink/adapter/api/TwitterApiAdapter'), 'prototype', 'get').mockReturnValue(MockApi.prototype);
-      jest.spyOn(require('../../../hatolink/usecase/PostScheduledTweetsUseCase'), 'prototype', 'get').mockReturnValue(MockUseCase.prototype);
+      };
+      // Mocks are already set up at the top of the file using jest.mock
+      // No need for jest.spyOn here
 
       // 実行
       require('../../../hatolink/infrastructure/triggers').runPostScheduledTweets();
