@@ -1,0 +1,33 @@
+# TASK-004 実装計画
+
+issue_id: TASK-004
+issue_title: '[Refactoring] APIアダプタとUseCase間のエラーハンドリングの不整合を修正'
+issue_url: 'https://github.com/masa-codehub/hatolink/issues/TASK-004'
+
+## 概要
+APIアダプタ（TwitterApiAdapter）とUseCase（PostScheduledTweetsUseCase）間のエラーハンドリングの責務分離を明確化し、API失敗時に後続処理（ステータス更新・保存）が実行されないようにリファクタリングする。
+
+## 完了定義（DoD）
+- TwitterApiAdapterのpostTweetがAPI失敗時に例外をスローする
+- PostScheduledTweetsUseCaseのexecuteがtry-catchでAPI失敗を検知し、失敗時は後続処理を行わない
+- 失敗時にtweet.markAsPostedやtweetRepository.saveが呼ばれない
+- 上記を検証するテストがtests/usecase/PostScheduledTweetsUseCase.test.jsに存在し、saveが呼ばれないことをアサート
+- coding-rules.ymlのCR-005（外部API連携における失敗許容設計）を遵守
+
+## implementation_steps:
+  - step: 1
+    title: "TwitterApiAdapterのpostTweetをリファクタし、API失敗時に例外をスローする"
+    command: "TwitterApiAdapter.jsのpostTweetを修正し、HTTPエラー時は例外を投げる。"
+    verification: "postTweetがAPI失敗時に例外をスローすることを単体テストで確認（既存テストまたは新規追加）"
+  - step: 2
+    title: "PostScheduledTweetsUseCaseのexecuteでAPI呼び出しをtry-catchで囲み、失敗時は後続処理を抑止"
+    command: "execute内のtwitterApi.postTweet呼び出しをtry-catchで囲み、catch時はmarkAsPostedやsaveを呼ばないよう修正"
+    verification: "API失敗時にtweet.markAsPostedやtweetRepository.saveが呼ばれないことをテストで確認"
+  - step: 3
+    title: "PostScheduledTweetsUseCaseのテストにAPI失敗時のシナリオを追加・強化"
+    command: "tests/usecase/PostScheduledTweetsUseCase.test.jsに、API失敗時にsaveが呼ばれないことを明示的にアサートするテストを追加"
+    verification: "テストが正しく失敗時の副作用抑止を検証し、全テストがパスすることを確認"
+  - step: 4
+    title: "全体のテストを実行し、DoDを満たすことを確認"
+    command: "npm test で全テストを実行し、DoDの全項目が満たされていることを確認"
+    verification: "全テストがパスし、DoDの各項目が満たされていることを確認"

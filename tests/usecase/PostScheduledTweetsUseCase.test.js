@@ -55,6 +55,17 @@ describe('PostScheduledTweetsUseCase', () => {
     const useCase = new PostScheduledTweetsUseCase(repo, api);
     await useCase.execute();
     expect(api.called.length).toBe(1);
+    expect(repo.saved.length).toBe(0); // saveが呼ばれないことを明示的にアサート
+    expect(tweet.status).toBe('未投稿');
+  });
+
+  it('APIが例外をスローした場合も、保存処理やステータス更新は行われない', async () => {
+    const tweet = { id: 3, status: '未投稿' };
+    const repo = new MockTweetRepository([tweet]);
+    // postTweetが例外をスローするモック
+    const api = { postTweet: async () => { throw new Error('API error'); }, called: [] };
+    const useCase = new PostScheduledTweetsUseCase(repo, api);
+    await useCase.execute();
     expect(repo.saved.length).toBe(0);
     expect(tweet.status).toBe('未投稿');
   });

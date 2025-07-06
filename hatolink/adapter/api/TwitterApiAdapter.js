@@ -30,6 +30,7 @@ class TwitterApiAdapter extends ITwitterApi {
    * ツイートを投稿する
    * @param {Object} tweet
    * @returns {Object}
+   * @throws {Error} API失敗時
    */
   postTweet(tweet) {
     const url = 'https://api.twitter.com/2/tweets';
@@ -45,13 +46,15 @@ class TwitterApiAdapter extends ITwitterApi {
     };
     if (typeof UrlFetchApp !== 'undefined') {
       const response = UrlFetchApp.fetch(url, options);
-      return {
-        code: response.getResponseCode(),
-        body: response.getContentText()
-      };
+      const code = response.getResponseCode();
+      const body = response.getContentText();
+      if (code < 200 || code >= 300) {
+        throw new Error(`Twitter API error: ${code} - ${body}`);
+      }
+      return { code, body };
     }
     // テスト/Node環境用フェールセーフ
-    return { code: 501, body: 'UrlFetchApp not available' };
+    throw new Error('UrlFetchApp not available');
   }
 }
 

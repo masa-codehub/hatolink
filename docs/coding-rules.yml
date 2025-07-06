@@ -182,3 +182,31 @@
       const useCase = new SomeUseCase(repository);
       useCase.execute();
     }
+- rule_id: "CR-010"
+  title: "Adapterは外部エラーを抽象化し、UseCaseに伝える"
+  description: "Adapter層の責務は、外部サービス（API, DB等）との通信における技術的詳細をカプセル化することにある。HTTPステータスコードやDBの接続エラーといった具体的なエラーはAdapter層で捕捉し、UseCase層にはより抽象化されたビジネス的な失敗（例: 例外のスロー、Resultオブジェクトの返却）として伝えるべきである。これにより、UseCaseは外部技術の詳細に依存せず、ビジネスフローの制御に専念できる。"
+  category: "設計原則"
+  example_bad: |
+    # UseCaseがHTTPレスポンスを直接解釈している
+    const response = await this.twitterApi.postTweet(tweet);
+    if (response.code !== 200) {
+      // UseCaseがHTTPの仕様を知ってしまっている
+      throw new Error('API Error');
+    }
+  example_good: |
+    # AdapterがHTTPエラーを例外に変換し、UseCaseはそれを捕捉する
+    // TwitterApiAdapter
+    postTweet(tweet) {
+      const response = UrlFetchApp.fetch(...);
+      if (response.getResponseCode() >= 400) {
+        throw new ApiPostError(response.getContentText());
+      }
+      return JSON.parse(response.getContentText());
+    }
+    // PostScheduledTweetsUseCase
+    try {
+      await this.twitterApi.postTweet(tweet);
+    } catch (e) {
+      // ビジネスフローの制御に専念
+      if (e instanceof ApiPostError) { /* ... */ }
+    }

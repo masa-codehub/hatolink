@@ -32,8 +32,8 @@ class PostScheduledTweetsUseCase {
         tweet.postedAt = new Date();
         await this.tweetRepository.save(tweet);
       } catch (e) {
-        // 失敗時: ステータスは変更しない
-        // ログ等は必要に応じて追加
+        // 失敗時: ステータスは変更しない、保存処理も行わない
+        // 必要に応じてエラーログ等を追加
       }
     }
   }
