@@ -65,3 +65,18 @@
     - モック化されたGASオブジェクトでテストが独立して実行できる
   note: |
     既存要件（TR-ADAPTER-001）と重複しないことを確認（2025-07-06時点）
+
+- id: TR-INFRA-002
+  title: "GASの定期実行トリガーがコードによって正しく設定されること"
+  description: |
+    PostScheduledTweetsUseCaseを定期的（10分ごと）に実行するトリガーが、コード（triggers.js）で冪等的に設定・管理されていること。
+    トリガーの設定・削除がScriptAppサービスを通じて自動化されていること。
+    テストではScriptAppをモック化し、トリガーの追加・削除ロジックの正しさを検証すること。
+  related_issue: "US-001-Infra-Trigger"
+  acceptance_criteria:
+    - triggers.jsにrunPostScheduledTweetsエントリーポイント関数が実装されている
+    - createTrigger関数が冪等にトリガーを設定できる
+    - ScriptAppをモック化したテストで、トリガーの追加・削除ロジックが正しく動作すること
+    - 全テストが成功する
+  note: |
+    既存要件と重複・矛盾なし（2025-07-06時点確認済み）

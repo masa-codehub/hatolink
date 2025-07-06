@@ -135,3 +135,30 @@
         return sheet.getRange("A1").getValue();
       }
     }
+- rule_id: "CR-008"
+  title: "トリガー設定はコードで管理し、冪等性を保証する"
+  description: "GASのトリガーを手動で設定すると、設定漏れや環境差分の原因となる。トリガーを設定する関数をコードとして実装し、複数回実行しても重複してトリガーが作成されないように、既存のトリガーを削除してから新規作成するなどの冪等性を保証する設計にすること。"
+  category: "インフラストラクチャ"
+  example_bad: |
+    # ただトリガーを追加するだけの関数。実行するたびにトリガーが増える。
+    function createTrigger() {
+      ScriptApp.newTrigger('myFunction')
+        .timeBased()
+        .everyMinutes(10)
+        .create();
+    }
+  example_good: |
+    # 既存のトリガーを削除してから作成する冪等な関数。
+    function setupTrigger() {
+      const functionName = 'myFunction';
+      const triggers = ScriptApp.getProjectTriggers();
+      triggers.forEach(trigger => {
+        if (trigger.getHandlerFunction() === functionName) {
+          ScriptApp.deleteTrigger(trigger);
+        }
+      });
+      ScriptApp.newTrigger(functionName)
+        .timeBased()
+        .everyMinutes(10)
+        .create();
+    }
