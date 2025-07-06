@@ -49,31 +49,6 @@ labels:
       - "blocked"
 
 issues:
-  - title: "[Refactoring] エントリーポイントにおける依存性注入を修正 (TASK-003)"
-    description: |
-      技術タスク `TASK-003` を実装する。
-      > 開発者として、インフラ層のエントリーポイント（triggers.js）で、クリーンアーキテクチャの原則通りに依存性注入（DI）が行われるようにしたい。
-      > それは、システムの保守性とテスト容易性を確保し、将来の機能拡張を容易にするためだ。
-      > 現状、`runPostScheduledTweets`関数内で`SpreadsheetTweetRepository`が正しくインスタンス化されていない問題を解決する必要がある。
-    implementation_tasks:
-      - "hatolink/infrastructure/triggers.js を修正し、runPostScheduledTweets 関数内で SpreadsheetTweetRepository と TwitterApiAdapter のインスタンスを正しく生成する。"
-      - "生成したインスタンスを PostScheduledTweetsUseCase のコンストラクタに注入（DI）する。"
-      - "(TDD) 既存の tests/infrastructure/triggers.test.js を拡張し、依存性の注入が正しく行われることを検証するテストケースを追加する。"
-    acceptance_criteria:
-      - "runPostScheduledTweets関数内で、SpreadsheetTweetRepositoryとTwitterApiAdapterが正しくインスタンス化され、PostScheduledTweetsUseCaseに注入（DI）されること。"
-      - "依存性の注入が完了し、US-001のシナリオがGAS上で正常に動作すること。"
-    related_requirement: "TASK-003, CR-004, CR-007"
-    dependencies:
-      - "US-001"
-    milestone: "技術的負債の返済"
-    labels:
-      - "type:refactoring"
-      - "type:technical-task"
-      - "layer:infrastructure"
-      - "layer:adapter-db"
-      - "epic:platform"
-      - "priority:P0-must-have"
-
   - title: "[Refactoring] APIアダプタとUseCase間のエラーハンドリングの不整合を修正 (TASK-004)"
     description: |
       技術タスク `TASK-004` を実装する。
@@ -313,4 +288,29 @@ Completed:
       - "type:chore"
       - "layer:infrastructure"
       - "epic:core-engine"
+      - "priority:P0-must-have"
+
+  - title: "[Refactoring] エントリーポイントにおける依存性注入を修正 (TASK-003)"
+    description: |
+      技術タスク `TASK-003` を実装する。
+      > 開発者として、インフラ層のエントリーポイント（triggers.js）で、クリーンアーキテクチャの原則通りに依存性注入（DI）が行われるようにしたい。
+      > それは、システムの保守性とテスト容易性を確保し、将来の機能拡張を容易にするためだ。
+      > 現状、`runPostScheduledTweets`関数内で`SpreadsheetTweetRepository`が正しくインスタンス化されていない問題を解決する必要がある。
+    implementation_tasks:
+      - "hatolink/infrastructure/triggers.js を修正し、runPostScheduledTweets 関数内で SpreadsheetTweetRepository と TwitterApiAdapter のインスタンスを正しく生成する。"
+      - "生成したインスタンスを PostScheduledTweetsUseCase のコンストラクタに注入（DI）する。"
+      - "(TDD) 既存の tests/infrastructure/triggers.test.js を拡張し、依存性の注入が正しく行われることを検証するテストケースを追加する。"
+    acceptance_criteria:
+      - "runPostScheduledTweets関数内で、SpreadsheetTweetRepositoryとTwitterApiAdapterが正しくインスタンス化され、PostScheduledTweetsUseCaseに注入（DI）されること。"
+      - "依存性の注入が完了し、US-001のシナリオがGAS上で正常に動作すること。"
+    related_requirement: "TASK-003, CR-004, CR-007"
+    dependencies:
+      - "US-001"
+    milestone: "技術的負債の返済"
+    labels:
+      - "type:refactoring"
+      - "type:technical-task"
+      - "layer:infrastructure"
+      - "layer:adapter-db"
+      - "epic:platform"
       - "priority:P0-must-have"
