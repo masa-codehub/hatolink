@@ -48,7 +48,74 @@ labels:
       - "blocked"
       - "needs-discussion"
 
-issues:
+issues:      
+  - title: "[Adapter] スプレッドシートの直接編集に対応 (US-005a)"
+    description: "ユーザーストーリー`US-005a`を実装する。コンテンツ管理者がスプレッドシートを直接編集・追加・削除した内容を、システムが正しく認識できるように`SpreadsheetTweetRepository`を改修する。"
+    implementation_tasks:
+      - "新規追加された行を新しい`Tweet`として認識するロジックをリポジトリに追加する。"
+      - "既存の行の内容変更を検知し、`Tweet`オブジェクトに反映させるロジックを実装する。"
+      - "行が削除された場合に、それを予約キャンセルとして扱うロジックを実装する。"
+      - "(TDD) コンテンツ管理者の手動操作をシミュレートしたテストケースを拡充する。"
+    acceptance_criteria:
+      - "スプレッドシートに新しい行を追加し、必要な項目を埋めると、それが新しい予約ツイートとして認識されること。"
+      - "「未投稿」ステータスのツイートの行情報をスプレッドシート上で変更すると、予約内容が更新されること。"
+      - "「未投稿」ステータスのツイートの行をスプレッドシートから削除すると、予約がキャンセルされること。"
+    related_requirement: "US-005a"
+    dependencies:
+      - "[Adapter] スプレッドシート用TweetRepositoryの実装 (US-001)"
+    milestone: "Release-2: 運用基盤の確立"
+    labels:
+      - "type:user-story"
+      - "layer:adapter-db"
+      - "epic:content-management"
+      - "priority:P1-should-have"
+      - "TDD"
+
+  - title: "[Adapter] エラーログ用リポジトリの実装 (US-003)"
+    description: "ユーザーストーリー`US-003`の一部として、投稿失敗時のエラー情報を記録するためのリポジトリとアダプタを実装する。"
+    implementation_tasks:
+      - "エラー情報を保持する`ErrorLog`オブジェクトを`domain`レイヤーに定義する（エンティティ or 値オブジェクト）。"
+      - "`usecase`レイヤーに`IErrorLogRepository`インターフェースを定義する。"
+      - "`adapter-db`レイヤーに`SpreadsheetErrorLogRepository`を実装し、エラー情報を専用のエラーログシートに追記する処理を実装する。"
+      - "(TDD) `SpreadsheetErrorLogRepository`のテストを作成する。"
+    acceptance_criteria:
+      - "エラー情報（日時、ツイートID、エラー理由）が指定のシートに正しく追記されること。"
+    related_requirement: "US-003"
+    dependencies:
+      - "TASK-001"
+    milestone: "Release-2: 運用基盤の確立"
+    labels:
+      - "type:technical-task"
+      - "layer:adapter-db"
+      - "layer:domain"
+      - "epic:core-engine"
+      - "priority:P1-should-have"
+      - "TDD"
+
+  - title: "[UseCase] 投稿失敗時のエラー記録ロジックを追加 (US-003)"
+    description: "ユーザーストーリー`US-003`のコアロジック。`PostScheduledTweetsUseCase`を拡張し、投稿失敗時のエラー記録処理を追加する。"
+    implementation_tasks:
+      - "`PostScheduledTweetsUseCase`に`IErrorLogRepository`を注入する。"
+      - "`ITwitterApi`の呼び出し部分に`try-catch`を追加し、例外処理を実装する。"
+      - "`catch`ブロック内で`IErrorLogRepository`を呼び出し、エラー情報を記録する。"
+      - "失敗した`Tweet`のステータスを「失敗」に更新し、`ITweetRepository`で永続化する。"
+      - "(TDD) APIアダプタが例外をスローするケースのテストを追加し、エラーログ記録とステータス更新が正しく行われることを検証する。"
+    acceptance_criteria:
+      - "Twitter APIへの投稿が失敗した場合、専用のエラーログシートに「日時」「対象ツイートの内容（またはID）」「エラー理由」が記録されること。"
+      - "投稿に失敗した元のツイートのステータスが「失敗」に更新されること。"
+    related_requirement: "US-003"
+    dependencies:
+      - "[UseCase] 予約ツイート自動投稿ユースケースの実装 (US-001)"
+      - "[Adapter] エラーログ用リポジトリの実装 (US-003)"
+    milestone: "Release-2: 運用基盤の確立"
+    labels:
+      - "type:user-story"
+      - "layer:usecase"
+      - "epic:core-engine"
+      - "priority:P1-should-have"
+      - "TDD"
+
+Completed:
   - title: "[TechTask] プロジェクト基盤のセットアップ（クリーンアーキテクチャ） (TASK-001)"
     description: "Google Apps Scriptプロジェクトの初期設定を行い、クリーンアーキテクチャに基づいた開発基盤を構築する。"
     implementation_tasks:
@@ -179,69 +246,3 @@ issues:
       - "layer:infrastructure"
       - "epic:core-engine"
       - "priority:P0-must-have"
-      
-  - title: "[Adapter] スプレッドシートの直接編集に対応 (US-005a)"
-    description: "ユーザーストーリー`US-005a`を実装する。コンテンツ管理者がスプレッドシートを直接編集・追加・削除した内容を、システムが正しく認識できるように`SpreadsheetTweetRepository`を改修する。"
-    implementation_tasks:
-      - "新規追加された行を新しい`Tweet`として認識するロジックをリポジトリに追加する。"
-      - "既存の行の内容変更を検知し、`Tweet`オブジェクトに反映させるロジックを実装する。"
-      - "行が削除された場合に、それを予約キャンセルとして扱うロジックを実装する。"
-      - "(TDD) コンテンツ管理者の手動操作をシミュレートしたテストケースを拡充する。"
-    acceptance_criteria:
-      - "スプレッドシートに新しい行を追加し、必要な項目を埋めると、それが新しい予約ツイートとして認識されること。"
-      - "「未投稿」ステータスのツイートの行情報をスプレッドシート上で変更すると、予約内容が更新されること。"
-      - "「未投稿」ステータスのツイートの行をスプレッドシートから削除すると、予約がキャンセルされること。"
-    related_requirement: "US-005a"
-    dependencies:
-      - "[Adapter] スプレッドシート用TweetRepositoryの実装 (US-001)"
-    milestone: "Release-2: 運用基盤の確立"
-    labels:
-      - "type:user-story"
-      - "layer:adapter-db"
-      - "epic:content-management"
-      - "priority:P1-should-have"
-      - "TDD"
-
-  - title: "[Adapter] エラーログ用リポジトリの実装 (US-003)"
-    description: "ユーザーストーリー`US-003`の一部として、投稿失敗時のエラー情報を記録するためのリポジトリとアダプタを実装する。"
-    implementation_tasks:
-      - "エラー情報を保持する`ErrorLog`オブジェクトを`domain`レイヤーに定義する（エンティティ or 値オブジェクト）。"
-      - "`usecase`レイヤーに`IErrorLogRepository`インターフェースを定義する。"
-      - "`adapter-db`レイヤーに`SpreadsheetErrorLogRepository`を実装し、エラー情報を専用のエラーログシートに追記する処理を実装する。"
-      - "(TDD) `SpreadsheetErrorLogRepository`のテストを作成する。"
-    acceptance_criteria:
-      - "エラー情報（日時、ツイートID、エラー理由）が指定のシートに正しく追記されること。"
-    related_requirement: "US-003"
-    dependencies:
-      - "TASK-001"
-    milestone: "Release-2: 運用基盤の確立"
-    labels:
-      - "type:technical-task"
-      - "layer:adapter-db"
-      - "layer:domain"
-      - "epic:core-engine"
-      - "priority:P1-should-have"
-      - "TDD"
-
-  - title: "[UseCase] 投稿失敗時のエラー記録ロジックを追加 (US-003)"
-    description: "ユーザーストーリー`US-003`のコアロジック。`PostScheduledTweetsUseCase`を拡張し、投稿失敗時のエラー記録処理を追加する。"
-    implementation_tasks:
-      - "`PostScheduledTweetsUseCase`に`IErrorLogRepository`を注入する。"
-      - "`ITwitterApi`の呼び出し部分に`try-catch`を追加し、例外処理を実装する。"
-      - "`catch`ブロック内で`IErrorLogRepository`を呼び出し、エラー情報を記録する。"
-      - "失敗した`Tweet`のステータスを「失敗」に更新し、`ITweetRepository`で永続化する。"
-      - "(TDD) APIアダプタが例外をスローするケースのテストを追加し、エラーログ記録とステータス更新が正しく行われることを検証する。"
-    acceptance_criteria:
-      - "Twitter APIへの投稿が失敗した場合、専用のエラーログシートに「日時」「対象ツイートの内容（またはID）」「エラー理由」が記録されること。"
-      - "投稿に失敗した元のツイートのステータスが「失敗」に更新されること。"
-    related_requirement: "US-003"
-    dependencies:
-      - "[UseCase] 予約ツイート自動投稿ユースケースの実装 (US-001)"
-      - "[Adapter] エラーログ用リポジトリの実装 (US-003)"
-    milestone: "Release-2: 運用基盤の確立"
-    labels:
-      - "type:user-story"
-      - "layer:usecase"
-      - "epic:core-engine"
-      - "priority:P1-should-have"
-      - "TDD"
