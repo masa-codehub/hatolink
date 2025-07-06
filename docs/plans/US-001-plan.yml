@@ -1,0 +1,27 @@
+issue_id: "US-001"
+title: "[UseCase] 予約ツイート自動投稿ユースケースの実装"
+related_issue_url: "https://github.com/masa-codehub/hatolink/issues/5"
+definition_of_done:
+  - hatolink/usecase/PostScheduledTweetsUseCase.js が作成されている
+  - PostScheduledTweetsUseCase は、コンストラクタで ITweetRepository と ITwitterApi のインスタンスを受け取り、具象クラスには依存していない
+  - tests/usecase/PostScheduledTweetsUseCase.test.js が作成され、リポジトリとAPIアダプタがモック化された単体テストが実装されている
+  - テストは、「投稿対象のツイートが存在する場合」に、APIが呼び出され、ドメインエンティティのステータスが更新され、リポジトリで保存される一連の流れを検証する
+  - テストは、「投稿対象のツイートが存在しない場合」に、API呼び出しや保存処理が実行されないことを検証する
+  - テストは、「Twitter APIへの投稿が失敗した場合」に、ドメインエンティティのステータスが更新されないことを検証する
+implementation_steps:
+  - step: 1
+    description: "ITweetRepository, ITwitterApiインターフェースの定義"
+    command: "hatolink/usecase/ITweetRepository.js, hatolink/usecase/ITwitterApi.js を新規作成"
+    verification: "インターフェースファイルが正しく作成され、必要なメソッドが定義されていることを確認"
+  - step: 2
+    description: "PostScheduledTweetsUseCaseの実装"
+    command: "hatolink/usecase/PostScheduledTweetsUseCase.js を新規作成"
+    verification: "ユースケースがインターフェースにのみ依存し、ビジネスロジックが正しく記述されていることを確認"
+  - step: 3
+    description: "ユースケースの単体テスト作成（TDD）"
+    command: "tests/usecase/PostScheduledTweetsUseCase.test.js を新規作成"
+    verification: "テストが全ての受け入れ基準を網羅し、モックを用いていることを確認"
+  - step: 4
+    description: "テスト実行とリファクタリング"
+    command: "テストを実行し、失敗した場合は実装を修正"
+    verification: "全てのテストがパスすることを確認"

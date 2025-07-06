@@ -46,3 +46,15 @@
     # /app/docs/coding-rules.yml
     # /app/docs/plans/TASK-001-plan.yml
     # /app/docs/reviews/review-request-TASK-001.md
+- rule_id: "CR-004"
+  title: "ユースケースはインターフェースのみに依存し、具象クラスに依存しない"
+  description: "ユースケース層の実装では、リポジトリやAPIアダプタ等のインターフェースにのみ依存し、具象クラスや外部実装には直接依存しないこと。これによりテスト容易性と保守性を高める。"
+  category: "設計原則"
+  example_bad: |
+    // 具象クラスに依存したユースケース
+    const repo = new SpreadsheetTweetRepository();
+    const api = new TwitterApiImpl();
+    const useCase = new PostScheduledTweetsUseCase(repo, api);
+  example_good: |
+    // インターフェースに依存したユースケース
+    const useCase = new PostScheduledTweetsUseCase(tweetRepository, twitterApi); // どちらもインターフェース型
