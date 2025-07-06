@@ -1,0 +1,27 @@
+issue_id: "TASK-001"
+title: "[TechTask] プロジェクト基盤のセットアップ（クリーンアーキテクチャ）"
+implementation_steps:
+  - step: 1
+    description: "claspを利用してGoogle Apps Scriptプロジェクトを初期化し、.clasp.jsonを作成する"
+    command: "npx clasp create --type standalone --title 'hatolink' --rootDir ./hatolink"
+    verification: |
+      hatolink/.clasp.json および hatolink/appsscript.json が生成されていることを確認する
+  - step: 2
+    description: "クリーンアーキテクチャに基づくディレクトリ構造を作成する"
+    command: |
+      mkdir -p hatolink/domain hatolink/usecase hatolink/adapter/api hatolink/adapter/db hatolink/infrastructure/tests
+    verification: |
+      各ディレクトリが正しく作成されていることを確認する
+  - step: 3
+    description: "GAS用テストフレームワーク（GasT）を導入し、サンプルテストを作成する"
+    command: |
+      npm install --save-dev @gaspack/gast
+      echo "function testSample() { GasTap('sample').test('1+1=2', t => t.equal(1+1,2)); }" > hatolink/infrastructure/tests/sample.test.js
+    verification: |
+      テストコマンド（npx gast run hatolink/infrastructure/tests）でサンプルテストが成功することを確認する
+  - step: 4
+    description: "appsscript.jsonのタイムゾーン・ランタイムバージョンを設定する"
+    command: |
+      jq '.timeZone="Asia/Tokyo" | .runtimeVersion="V8"' hatolink/appsscript.json > hatolink/appsscript.json.tmp && mv hatolink/appsscript.json.tmp hatolink/appsscript.json
+    verification: |
+      appsscript.jsonのtimeZoneがAsia/Tokyo、runtimeVersionがV8になっていることを確認する
