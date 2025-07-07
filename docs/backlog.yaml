@@ -84,7 +84,7 @@ spec:
     - id: "TASK-003"
       type: "Technical Story"
       priority: "P0 - Must Have"
-      status: "ToDo"
+      status: "Completed"
       title: "エントリーポイントにおける依存性注入のリファクタリング"
       story: |
         開発者として、インフラ層のエントリーポイント（triggers.js）で、クリーンアーキテクチャの原則通りに依存性注入（DI）が行われるようにしたい。
@@ -98,10 +98,13 @@ spec:
       relatedLayers: ["Infrastructure", "Adapter-DB"]
       storyPoints: 2
       dependencies: ["US-001"]
+      completionSummary: |
+        - `triggers.js`の`runPostScheduledTweets`関数内で、`SpreadsheetTweetRepository`と`TwitterApiAdapter`をインスタンス化し、`PostScheduledTweetsUseCase`に依存性を注入（DI）するように修正。
+        - コーディングルール`CR-009`を追加。
     - id: "TASK-004"
       type: "Technical Story"
       priority: "P0 - Must Have"
-      status: "ToDo"
+      status: "Completed"
       title: "APIアダプタとUseCase間のエラーハンドリングの不整合を修正"
       story: |
         開発者として、UseCaseがAdapterからのAPI失敗応答を確実に検知できるようにしたい。
@@ -116,6 +119,30 @@ spec:
       relatedLayers: ["UseCase", "Adapter-API"]
       storyPoints: 3
       dependencies: ["US-001", "TASK-003"]
+      completionSummary: |
+        - `TwitterApiAdapter`がAPIエラー時に例外をスローし、`PostScheduledTweetsUseCase`が`try-catch`で失敗を捕捉して後続処理を中断するように修正。
+        - UseCaseのテストを強化し、API失敗時に`save`が呼ばれないことを検証。
+        - コーディングルール`CR-010`を追加。
+    - id: "TASK-005"
+      type: "Technical Story"
+      priority: "P1 - Should Have"
+      status: "Completed"
+      title: "UseCaseからドメインのメソッドを呼び出すようにリファクタリング"
+      story: |
+        開発者として、UseCase層がドメインオブジェクトの状態を直接書き換えるのではなく、ドメインに定義されたメソッド（例: markAsPosted）を呼び出すようにしたい。
+        それは、ドメインの不変条件をドメイン層自身が保証する責務を維持し、モデルの堅牢性を高めるためだ。
+      acceptanceCriteria:
+        - "`PostScheduledTweetsUseCase`の投稿成功ロジックが、`tweet.markAsPosted()`メソッドを呼び出すように修正されていること。"
+        - "ドメインオブジェクトの状態が直接操作されていないこと。"
+      referenceId: "CR-006"
+      epicId: "EPIC-03"
+      relatedLayers: ["UseCase", "Domain"]
+      storyPoints: 1
+      dependencies: ["US-001"]
+      completionSummary: |
+        - `PostScheduledTweetsUseCase`が`tweet.status`を直接変更するのではなく、`tweet.markAsPosted()`メソッドを呼び出すようにリファクタリング。
+        - ドメインの不変条件がドメイン層で保証される`CR-006`のルールを徹底。
+        - `markAsPosted`メソッドが呼び出されることをスパイで検証するテストを追加。
 
     # --- P1 (Should Have) ---
     - id: "US-005a"
@@ -152,21 +179,23 @@ spec:
       storyPoints: 2
       dependencies: ["US-001"]
 
-    - id: "TASK-005"
+    - id: "TASK-006"
       type: "Technical Story"
       priority: "P1 - Should Have"
       status: "ToDo"
-      title: "UseCaseからドメインのメソッドを呼び出すようにリファクタリング"
+      title: "スプレッドシートのフォーマットチェック機能を追加"
       story: |
-        開発者として、UseCase層がドメインオブジェクトの状態を直接書き換えるのではなく、ドメインに定義されたメソッド（例: markAsPosted）を呼び出すようにしたい。
-        それは、ドメインの不変条件をドメイン層自身が保証する責務を維持し、モデルの堅牢性を高めるためだ。
+        開発者として、システムがスプレッドシートを読み込む際に、そのフォーマット（シート名、ヘッダー行）が期待通りか検証する機能を実装したい。
+        それは、コンテンツ管理者が誤ったシートを設定したり、ヘッダーを意図せず変更してしまった場合に、システムが即座に異常を検知し、予期せぬ挙動で停止するのを防ぐためだ。
       acceptanceCriteria:
-        - "`PostScheduledTweetsUseCase`の投稿成功ロジックが、`tweet.markAsPosted()`メソッドを呼び出すように修正されていること。"
-        - "ドメインオブジェクトの状態が直接操作されていないこと。"
-      referenceId: "CR-006"
+        - "システムの起動時（SpreadsheetServiceの初期化時）に、指定されたシート名（'Queue'）が存在するかどうかをチェックすること。"
+        - "シートが存在しない場合、エラーログに「指定されたシート名 'Queue' が見つかりませんでした。」といった具体的なメッセージが記録され、処理が安全に停止すること。"
+        - "行データの読み込み時（getRowsメソッド）に、1行目のヘッダーが期待される列構成（'tweetId', 'status', 'scheduledAt'等）と一致するかを検証すること。"
+        - "ヘッダーの構成が異なる場合、エラーログに不一致である旨が記録され、処理が安全に停止すること。"
+      referenceId: "N/A"
       epicId: "EPIC-03"
-      relatedLayers: ["UseCase", "Domain"]
-      storyPoints: 1
+      relatedLayers: ["Adapter-DB"]
+      storyPoints: 2
       dependencies: ["US-001"]
 
     # --- P2 (Could Have - バックログアイテム) ---

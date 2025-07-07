@@ -210,3 +210,47 @@
       // ビジネスフローの制御に専念
       if (e instanceof ApiPostError) { /* ... */ }
     }
+- rule_id: "CR-011"
+  title: "GAS環境でグローバル関数を明示的に公開する"
+  description: |
+    webpack等でバンドルしたGASプロジェクトでは、GASエディタやトリガー設定画面で関数を選択できるようにするため、
+    エントリーポイントとなる関数（例: runPostScheduledTweets, createTrigger）は必ず `global.関数名 = 関数;` でグローバルオブジェクトに明示的に追加すること。
+    これにより、GASのUIから関数が認識・選択可能となる。
+  category: "GAS運用・デプロイ"
+  example_bad: |
+    // triggers.js
+    function runPostScheduledTweets() { /* ... */ }
+    // 何もexport/global登録しない場合、GASエディタで関数が選択できない
+  example_good: |
+    // triggers.js
+    function runPostScheduledTweets() { /* ... */ }
+    global.runPostScheduledTweets = runPostScheduledTweets;
+    // これでGASエディタやトリガー設定画面で関数が選択できる
+- rule_id: "CR-012"
+  title: "GAS外部サービス連携・認証・設定の運用ルール"
+  description: |
+    - GASで外部API（例: Twitter API）と連携する場合、認証方式・権限・ライブラリ・プロパティ設定をREADME.md等に必ず明記し、手順を厳守すること。
+    - Twitter APIの書き込み系エンドポイントを利用する場合、アプリの「App permissions」は必ず `Read and Write` に設定し、権限変更後はAccess Token/Secretを再生成してGASプロパティに反映すること。
+    - GASライブラリ（例: OAuth1）は、識別子を仕様通り（例: `OAuth1`）で追加し、未定義エラーを防ぐこと。
+    - スプレッドシート連携時は、シート名・ヘッダー・ID等の設定値をプロパティで管理し、README.mdに記載すること。
+  category: "運用・外部連携"
+  example_bad: |
+    // Twitter APIのApp permissionsがRead Onlyのまま運用し、投稿APIが403エラーになる
+    // OAuth1ライブラリの識別子がOAuth1_1などになっていてReferenceErrorになる
+    // スプレッドシートIDやシート名がREADMEやプロパティに記載されていない
+  example_good: |
+    // README.mdにTwitter APIの権限・ライブラリ・プロパティ設定手順を明記
+    // GASエディタでOAuth1ライブラリを識別子OAuth1で追加
+    // 権限変更後はAccess Token/Secretを再生成しプロパティに反映
+    // スプレッドシートIDやシート名もプロパティ・READMEで明示
+- rule_id: "CR-013"
+  title: "スプレッドシートのフォーマット・ヘッダー検証の徹底"
+  description: |
+    - SpreadsheetService等でスプレッドシートを扱う際は、シート名の存在チェック・ヘッダー行の検証を必ず実装し、異常時は明確なエラーログを出すこと。
+    - ヘッダーの期待値（例: tweetId, body, status, scheduledAt, ...）はコード・ドキュメント両方で明示し、運用者が誤って変更した場合も即座に検知できるようにする。
+  category: "データ連携・堅牢性"
+  example_bad: |
+    // シート名やヘッダーの存在・整合性をチェックせず、データ不整合やランタイムエラーを招く
+  example_good: |
+    // SpreadsheetServiceの初期化・getRowsでシート名・ヘッダー検証を実装し、異常時はLogger.logで詳細を出力
+    // README.mdやbacklog.yamlに期待されるヘッダー構成を明記
