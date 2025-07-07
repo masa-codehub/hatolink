@@ -1,9 +1,9 @@
 // triggers.js
 // US-001-Infra-Trigger: PostScheduledTweetsUseCaseの定期実行トリガー設定
 
-const { PostScheduledTweetsUseCase } = require('../usecase/PostScheduledTweetsUseCase');
-const { SpreadsheetTweetRepository } = require('../adapter/db/SpreadsheetTweetRepository');
-const { TwitterApiAdapter } = require('../adapter/api/TwitterApiAdapter');
+const PostScheduledTweetsUseCase = require('../usecase/PostScheduledTweetsUseCase');
+const SpreadsheetTweetRepository = require('../adapter/db/SpreadsheetTweetRepository');
+const TwitterApiAdapter = require('../adapter/api/TwitterApiAdapter');
 const SpreadsheetService = require('../adapter/db/SpreadsheetService');
 
 /**
@@ -39,3 +39,6 @@ module.exports = {
   runPostScheduledTweets,
   createTrigger,
 };
+
+global.runPostScheduledTweets = runPostScheduledTweets;
+global.createTrigger = createTrigger;

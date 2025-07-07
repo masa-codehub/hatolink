@@ -22,8 +22,12 @@ class SpreadsheetTweetRepository extends ITweetRepository {
    */
   async findScheduledTweetsToPost() {
     const rows = await this.spreadsheetService.getRows();
+    const now = new Date(); // ★現在時刻を取得
     return rows
-      .filter(row => row.status === 'SCHEDULED')
+      .filter(row => {
+        const scheduledAt = new Date(row.scheduledAt);
+        return row.status === 'SCHEDULED' && scheduledAt <= now;
+      })
       .map(row => Tweet.fromRow(row));
   }
 

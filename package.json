@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "build": "webpack",
+    "deploy": "npm run build && clasp push",
     "test": "jest"
   },
   "keywords": [],
@@ -10,6 +12,10 @@
   "license": "ISC",
   "devDependencies": {
     "@types/google-apps-script": "^1.0.83",
-    "jest": "^30.0.4"
+    "copy-webpack-plugin": "^13.0.0",
+    "gas-webpack-plugin": "^2.6.0",
+    "jest": "^30.0.4",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
   }
 }

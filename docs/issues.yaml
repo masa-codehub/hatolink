@@ -49,31 +49,6 @@ labels:
       - "blocked"
 
 issues:
-  - title: "[Refactoring] UseCaseからドメインのメソッドを呼び出すように修正 (TASK-005)"
-    description: |
-      技術タスク `TASK-005` を実装する。
-      > 開発者として、UseCase層がドメインオブジェクトの状態を直接書き換えるのではなく、ドメインに定義されたメソッド（例: markAsPosted）を呼び出すようにしたい。
-      > それは、ドメインの不変条件をドメイン層自身が保証する責務を維持し、モデルの堅牢性を高めるためだ。
-    implementation_tasks:
-      - "hatolink/usecase/PostScheduledTweetsUseCase.js の execute メソッド内で、tweet.status = '投稿済' のような直接的な状態変更をやめる。"
-      - "代わりに、tweet.markAsPosted() のようなドメインエンティティに定義されたメソッドを呼び出すように修正する。"
-      - "(TDD) tests/usecase/PostScheduledTweetsUseCase.test.js のテストで、markAsPosted メソッドが呼び出されたことをスパイやモックで検証する。"
-    acceptance_criteria:
-      - "PostScheduledTweetsUseCaseの投稿成功ロジックが、tweet.markAsPosted()メソッドを呼び出すように修正されていること。"
-      - "ドメインオブジェクトの状態が直接操作されていないこと。"
-    related_requirement: "TASK-005, CR-006"
-    dependencies:
-      - "US-001"
-    milestone: "技術的負債の返済"
-    labels:
-      - "type:refactoring"
-      - "type:technical-task"
-      - "layer:usecase"
-      - "layer:domain"
-      - "epic:platform"
-      - "priority:P1-should-have"
-      - "TDD"
-
   - title: "[UserStory] スプレッドシートでの個別ツイート管理に対応 (US-005a)"
     description: |
       ユーザーストーリー `US-005a` を実装する。
@@ -314,3 +289,29 @@ Completed:
       - "epic:platform"
       - "priority:P0-must-have"
       - "TDD"
+
+  - title: "[Refactoring] UseCaseからドメインのメソッドを呼び出すように修正 (TASK-005)"
+    description: |
+      技術タスク `TASK-005` を実装する。
+      > 開発者として、UseCase層がドメインオブジェクトの状態を直接書き換えるのではなく、ドメインに定義されたメソッド（例: markAsPosted）を呼び出すようにしたい。
+      > それは、ドメインの不変条件をドメイン層自身が保証する責務を維持し、モデルの堅牢性を高めるためだ。
+    implementation_tasks:
+      - "hatolink/usecase/PostScheduledTweetsUseCase.js の execute メソッド内で、tweet.status = '投稿済' のような直接的な状態変更をやめる。"
+      - "代わりに、tweet.markAsPosted() のようなドメインエンティティに定義されたメソッドを呼び出すように修正する。"
+      - "(TDD) tests/usecase/PostScheduledTweetsUseCase.test.js のテストで、markAsPosted メソッドが呼び出されたことをスパイやモックで検証する。"
+    acceptance_criteria:
+      - "PostScheduledTweetsUseCaseの投稿成功ロジックが、tweet.markAsPosted()メソッドを呼び出すように修正されていること。"
+      - "ドメインオブジェクトの状態が直接操作されていないこと。"
+    related_requirement: "TASK-005, CR-006"
+    dependencies:
+      - "US-001"
+    milestone: "技術的負債の返済"
+    labels:
+      - "type:refactoring"
+      - "type:technical-task"
+      - "layer:usecase"
+      - "layer:domain"
+      - "epic:platform"
+      - "priority:P1-should-have"
+      - "TDD"
+

@@ -1,6 +1,6 @@
 {
   "scriptId": "1IieU5rmh_ituPEGrMYXlXIIdC8IA4TpHWdW0Bvf8mRTY553XEpseF2Mn",
-  "rootDir": "hatolink",
+  "rootDir": "./dist",
   "scriptExtensions": [
     ".js",
     ".gs"
